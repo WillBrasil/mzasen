@@ -2,6 +2,8 @@
 
 ## Configuração do Ambiente
 
+### Desenvolvimento
+
 1. Clone o repositório:
 ```bash
 git clone [url-do-repositorio]
@@ -19,6 +21,7 @@ cp .env.example .env
 ```
 Edite o arquivo `.env` com suas configurações:
 - `DATABASE_URL`: URL de conexão com o banco de dados PostgreSQL
+- `DIRECT_URL`: URL direta para o banco de dados (mesma que DATABASE_URL em desenvolvimento)
 - `JWT_SECRET`: Chave secreta para geração de tokens JWT
 
 4. Configure o banco de dados:
@@ -31,6 +34,19 @@ npx prisma migrate dev
 npm run dev
 ```
 
+### Produção (Vercel)
+
+1. Crie uma conta no [Neon](https://neon.tech)
+2. Crie um novo projeto no Neon
+3. Configure as variáveis de ambiente na Vercel:
+   - `DATABASE_URL`: URL de conexão fornecida pelo Neon
+   - `DIRECT_URL`: URL direta fornecida pelo Neon
+   - `JWT_SECRET`: Chave secreta para tokens JWT (gere uma string aleatória segura)
+4. Faça o deploy na Vercel:
+```bash
+git push
+```
+
 ## Scripts Disponíveis
 
 - `npm run dev`: Inicia o servidor de desenvolvimento
@@ -41,7 +57,7 @@ npm run dev
 ## Tecnologias Utilizadas
 
 - Next.js 15
-- PostgreSQL
+- PostgreSQL (Neon)
 - Prisma
 - TypeScript
 - TailwindCSS
