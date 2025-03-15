@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   description: "Detalhes e histórico do paciente",
 }
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page({ params }: any) {
   return <PacientePage params={params} />
 } 
