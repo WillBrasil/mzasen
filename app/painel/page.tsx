@@ -59,7 +59,11 @@ export default function PainelPage() {
           <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between">
               <h1 className="text-3xl font-bold text-sage-900">Bem-vindo(a), {user.nome}</h1>
-              <Button variant="outline" className="text-sage-600 hover:text-sage-700">
+              <Button 
+                variant="outline" 
+                className="text-sage-600 hover:text-sage-700"
+                onClick={() => router.push("/painel/configuracoes")}
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 Configurações
               </Button>
@@ -156,7 +160,11 @@ export default function PainelPage() {
                           })}
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => router.push("/painel/consulta")}
+                      >
                         Ver detalhes
                       </Button>
                     </div>
