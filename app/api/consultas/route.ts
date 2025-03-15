@@ -13,7 +13,14 @@ export async function GET(request: Request) {
         data: true,
         horario: true,
         status: true,
-        profissional: true
+        profissional: true,
+        servico: true,
+        nome: true
+      },
+      where: {
+        data: {
+          not: null
+        }
       }
     })
 

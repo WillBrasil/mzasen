@@ -22,6 +22,11 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     
+    // Gera uma data e horário para o agendamento
+    const hoje = new Date()
+    const dataAgendamento = hoje.toISOString().split('T')[0]
+    const horarioAgendamento = `${hoje.getHours()}:${hoje.getMinutes()}`
+    
     const agendamento = await prisma.agendamento.create({
       data: {
         nome: data.nome,
@@ -30,6 +35,9 @@ export async function POST(request: Request) {
         preferencia_contato: data.preferencia_contato,
         periodo: data.periodo,
         servico: data.servico,
+        data: dataAgendamento,
+        horario: horarioAgendamento,
+        profissional: "Dra. Maria Zanetti" // Valor padrão
       },
     })
 
