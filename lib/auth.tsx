@@ -10,6 +10,7 @@ interface User {
   cpf: string
   telefone: string
   dataNascimento: string
+  tipo: string
 }
 
 interface AuthContextType {
@@ -17,7 +18,7 @@ interface AuthContextType {
   loading: boolean
   error: string | null
   login: (email: string, senha: string) => Promise<void>
-  register: (userData: Omit<User, "id"> & { senha: string }) => Promise<void>
+  register: (userData: Omit<User, "id" | "tipo"> & { senha: string }) => Promise<void>
   logout: () => void
 }
 
@@ -63,7 +64,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(data.user)
       localStorage.setItem("token", data.token)
       localStorage.setItem("user", JSON.stringify(data.user))
-      router.push("/painel")
+      
+      // Redireciona baseado no tipo de usuário
+      if (data.user.tipo === "profissional") {
+        router.push("/painel-profissional")
+      } else {
+        router.push("/painel")
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login")
     } finally {
@@ -71,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const register = async (userData: Omit<User, "id"> & { senha: string }) => {
+  const register = async (userData: Omit<User, "id" | "tipo"> & { senha: string }) => {
     try {
       setLoading(true)
       setError(null)

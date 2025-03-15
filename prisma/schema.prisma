@@ -21,6 +21,7 @@ model User {
   telefone       String
   dataNascimento String
   senha          String
+  tipo           String   @default("paciente")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

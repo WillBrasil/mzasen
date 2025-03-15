@@ -17,7 +17,17 @@ export async function POST(request: Request) {
 
     // Busca o usuário pelo email
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        cpf: true,
+        telefone: true,
+        dataNascimento: true,
+        tipo: true,
+        senha: true
+      }
     })
 
     if (!user) {
@@ -40,7 +50,8 @@ export async function POST(request: Request) {
     // Gera o token JWT
     const token = signJWT({
       id: user.id,
-      email: user.email
+      email: user.email,
+      tipo: user.tipo
     })
 
     // Remove a senha do objeto de retorno
