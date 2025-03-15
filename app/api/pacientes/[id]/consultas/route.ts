@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 export async function GET(request: Request) {
   try {
@@ -23,28 +25,26 @@ export async function GET(request: Request) {
       )
     }
 
-    // Busca as consultas do paciente pelo email
-    const consultas = await prisma.agendamento.findMany({
+    // Busca todas as consultas do paciente
+    const consultasDB = await prisma.agendamento.findMany({
       where: {
-        email: paciente.email,
-        status: {
-          not: "cancelada"
-        }
+        email: paciente.email
       },
       orderBy: {
-        createdAt: "desc"
+        data: "desc"
       }
     })
 
-    const consultasFormatadas = consultas.map(consulta => ({
+    // Formata as datas das consultas
+    const consultas = consultasDB.map(consulta => ({
       id: consulta.id,
-      data: consulta.data,
-      horario: consulta.horario,
+      data: consulta.data ? format(new Date(consulta.data), "dd/MM/yyyy", { locale: ptBR }) : "Data não definida",
+      horario: consulta.horario || "Horário não definido",
       status: consulta.status,
       servico: consulta.servico
     }))
 
-    return NextResponse.json({ consultas: consultasFormatadas })
+    return NextResponse.json({ consultas })
   } catch (error) {
     console.error("Erro ao buscar consultas:", error)
     return NextResponse.json(
