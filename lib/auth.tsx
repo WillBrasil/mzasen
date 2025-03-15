@@ -39,11 +39,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const user = JSON.parse(storedUser)
       setUser(user)
       
-      // Redireciona para a página correta se já estiver logado
-      if (user.tipo === "profissional") {
-        router.push("/painel-profissional")
-      } else {
-        router.push("/painel-paciente")
+      // Verifica a rota atual
+      const path = window.location.pathname
+      
+      // Só redireciona se estiver na home, login ou registro
+      if (path === "/" || path === "/login" || path === "/registro") {
+        if (user.tipo === "profissional") {
+          router.push("/painel-profissional")
+        } else {
+          router.push("/painel-paciente")
+        }
       }
     }
     
