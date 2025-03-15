@@ -73,59 +73,53 @@ export default function PainelProfissionalPage() {
       router.push("/login")
       return
     }
-    carregarDados()
+    carregarConsultasHoje()
+    carregarPacientes()
   }, [user, router])
 
   useEffect(() => {
-    if (user?.tipo === "profissional") {
-      const timer = setTimeout(() => {
-        carregarPacientes()
-      }, 500) // Debounce de 500ms
+    if (user?.tipo !== "profissional") return
 
-      return () => clearTimeout(timer)
-    }
+    const timer = setTimeout(() => {
+      carregarPacientes()
+    }, 300)
+
+    return () => clearTimeout(timer)
   }, [busca, pagina])
 
-  const carregarPacientes = async () => {
+  const carregarConsultasHoje = async () => {
     try {
-      const queryParams = new URLSearchParams({
-        busca: busca,
-        page: pagina.toString(),
-        limit: "5", // Limitado a 5 pacientes por página
-        orderBy: "createdAt", // Corrigido para usar o nome correto do campo
-        order: "desc" // Ordem decrescente (mais recentes primeiro)
-      }).toString()
-
-      const response = await fetch(`/api/pacientes?${queryParams}`)
+      const response = await fetch("/api/consultas/hoje")
+      if (!response.ok) throw new Error("Erro ao carregar consultas")
       
-      if (!response.ok) {
-        throw new Error("Erro ao carregar pacientes")
-      }
-
       const data = await response.json()
-      setPacientes(data.pacientes)
-      setTotalPaginas(data.paginas)
+      setConsultasHoje(data.consultas)
     } catch (error) {
-      console.error("Erro ao carregar pacientes:", error)
+      console.error("Erro ao carregar consultas:", error)
     }
   }
 
-  const carregarDados = async () => {
+  const carregarPacientes = async () => {
     try {
       setIsLoading(true)
-      const [consultasRes] = await Promise.all([
-        fetch("/api/consultas/hoje"),
-        carregarPacientes()
-      ])
+      const params = new URLSearchParams({
+        busca: busca,
+        page: pagina.toString(),
+        limit: "5",
+        orderBy: "createdAt",
+        order: "desc"
+      })
 
-      if (!consultasRes.ok) {
-        throw new Error("Erro ao carregar dados")
-      }
+      const response = await fetch(`/api/pacientes?${params}`)
+      if (!response.ok) throw new Error("Erro ao carregar pacientes")
 
-      const consultasData = await consultasRes.json()
-      setConsultasHoje(consultasData.consultas)
+      const data = await response.json()
+      setPacientes(data.pacientes || [])
+      setTotalPaginas(data.paginas || 1)
     } catch (error) {
-      console.error("Erro ao carregar dados:", error)
+      console.error("Erro ao carregar pacientes:", error)
+      setPacientes([])
+      setTotalPaginas(1)
     } finally {
       setIsLoading(false)
     }
@@ -133,7 +127,7 @@ export default function PainelProfissionalPage() {
 
   const handleBuscaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBusca(e.target.value)
-    setPagina(1) // Reset da página ao buscar
+    setPagina(1)
   }
 
   if (!user) {
