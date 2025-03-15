@@ -13,6 +13,11 @@ import {
   FileText,
   TrendingUp,
   Bell,
+  ChevronLeft,
+  ChevronRight,
+  Phone,
+  Mail,
+  CalendarRange,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth"
@@ -26,13 +31,22 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface Paciente {
   id: string
   nome: string
   email: string
   telefone: string
-  ultimaConsulta: string
+  cadastradoEm: string
+  ultimaConsulta: string | null
   proximaConsulta: string | null
 }
 
@@ -49,6 +63,8 @@ export default function PainelProfissionalPage() {
   const [consultasHoje, setConsultasHoje] = useState<ConsultaHoje[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [busca, setBusca] = useState("")
+  const [pagina, setPagina] = useState(1)
+  const [totalPaginas, setTotalPaginas] = useState(1)
   const router = useRouter()
 
   useEffect(() => {
@@ -57,12 +73,12 @@ export default function PainelProfissionalPage() {
       return
     }
     carregarDados()
-  }, [user, router])
+  }, [user, router, busca, pagina])
 
   const carregarDados = async () => {
     try {
       const [pacientesRes, consultasRes] = await Promise.all([
-        fetch("/api/pacientes"),
+        fetch(`/api/pacientes?busca=${busca}&page=${pagina}&limit=10`),
         fetch("/api/consultas/hoje"),
       ])
 
@@ -74,6 +90,7 @@ export default function PainelProfissionalPage() {
       const consultasData = await consultasRes.json()
 
       setPacientes(pacientesData.pacientes)
+      setTotalPaginas(pacientesData.paginas)
       setConsultasHoje(consultasData.consultas)
     } catch (error) {
       console.error("Erro ao carregar dados:", error)
@@ -82,9 +99,10 @@ export default function PainelProfissionalPage() {
     }
   }
 
-  const pacientesFiltrados = pacientes.filter((paciente) =>
-    paciente.nome.toLowerCase().includes(busca.toLowerCase())
-  )
+  const handleBuscaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBusca(e.target.value)
+    setPagina(1)
+  }
 
   if (!user) {
     return null
@@ -240,9 +258,9 @@ export default function PainelProfissionalPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
                   <Input
-                    placeholder="Buscar paciente..."
+                    placeholder="Buscar por nome, email ou telefone..."
                     value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
+                    onChange={handleBuscaChange}
                     className="pl-9"
                   />
                 </div>
@@ -250,52 +268,117 @@ export default function PainelProfissionalPage() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <p>Carregando...</p>
-              ) : pacientesFiltrados.length > 0 ? (
-                <div className="space-y-4">
-                  {pacientesFiltrados.map((paciente) => (
-                    <div
-                      key={paciente.id}
-                      className="flex items-center justify-between border-b pb-4 last:border-0"
-                    >
-                      <div className="space-y-1">
-                        <p className="font-medium">{paciente.nome}</p>
-                        <p className="text-sm text-gray-500">{paciente.email}</p>
-                        <p className="text-sm text-gray-500">
-                          Última consulta:{" "}
-                          {format(new Date(paciente.ultimaConsulta), "PPP", {
-                            locale: ptBR,
-                          })}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() =>
-                            router.push(
-                              `/painel-profissional/pacientes/${paciente.id}/plano-alimentar`
-                            )
-                          }
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          Plano Alimentar
-                        </Button>
-                        <Button
-                          variant="default"
-                          onClick={() =>
-                            router.push(
-                              `/painel-profissional/pacientes/${paciente.id}`
-                            )
-                          }
-                        >
-                          Ver detalhes
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <div className="text-center py-4">Carregando...</div>
               ) : (
-                <p>Nenhum paciente encontrado</p>
+                <>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nome</TableHead>
+                          <TableHead>Contato</TableHead>
+                          <TableHead>Última Consulta</TableHead>
+                          <TableHead>Próxima Consulta</TableHead>
+                          <TableHead>Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pacientes.map((paciente) => (
+                          <TableRow key={paciente.id}>
+                            <TableCell>
+                              <div className="font-medium">{paciente.nome}</div>
+                              <div className="text-sm text-gray-500">
+                                Cadastrado em{" "}
+                                {format(new Date(paciente.cadastradoEm), "dd/MM/yyyy")}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <Mail className="h-4 w-4 text-gray-500" />
+                                  <span className="text-sm">{paciente.email}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-4 w-4 text-gray-500" />
+                                  <span className="text-sm">{paciente.telefone}</span>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {paciente.ultimaConsulta ? (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-gray-500" />
+                                  <span>
+                                    {format(new Date(paciente.ultimaConsulta), "dd/MM/yyyy")}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-gray-500">Nenhuma consulta</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {paciente.proximaConsulta ? (
+                                <div className="flex items-center gap-2">
+                                  <CalendarRange className="h-4 w-4 text-gray-500" />
+                                  <span>
+                                    {format(new Date(paciente.proximaConsulta), "dd/MM/yyyy")}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-gray-500">Não agendada</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    router.push(`/painel-profissional/pacientes/${paciente.id}`)
+                                  }
+                                >
+                                  Ver Detalhes
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    router.push(`/painel-profissional/pacientes/${paciente.id}/plano-alimentar`)
+                                  }
+                                >
+                                  Plano Alimentar
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="flex items-center justify-between space-x-2 py-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPagina(Math.max(1, pagina - 1))}
+                      disabled={pagina === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-2" />
+                      Anterior
+                    </Button>
+                    <div className="text-sm text-gray-600">
+                      Página {pagina} de {totalPaginas}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPagina(Math.min(totalPaginas, pagina + 1))}
+                      disabled={pagina === totalPaginas}
+                    >
+                      Próxima
+                      <ChevronRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
