@@ -55,7 +55,14 @@ interface PlanoAlimentar {
   observacoes: string
 }
 
-export default function PacientePage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: {
+    id: string
+  }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export default function PacientePage({ params }: PageProps) {
   const [paciente, setPaciente] = useState<Paciente | null>(null)
   const [consultas, setConsultas] = useState<Consulta[]>([])
   const [planoAlimentar, setPlanoAlimentar] = useState<PlanoAlimentar | null>(null)
