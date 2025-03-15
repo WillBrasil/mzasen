@@ -110,12 +110,30 @@ export default function PainelProfissionalPage() {
         order: "desc"
       })
 
+      console.log("Carregando pacientes com parâmetros:", {
+        busca,
+        pagina,
+        params: params.toString()
+      })
+
       const response = await fetch(`/api/pacientes?${params}`)
       if (!response.ok) throw new Error("Erro ao carregar pacientes")
 
       const data = await response.json()
-      setPacientes(data.pacientes || [])
-      setTotalPaginas(data.paginas || 1)
+      console.log("Dados recebidos:", {
+        totalPacientes: data.pacientes?.length,
+        paginas: data.paginas,
+        total: data.total
+      })
+
+      if (Array.isArray(data.pacientes)) {
+        setPacientes(data.pacientes)
+        setTotalPaginas(data.paginas || 1)
+      } else {
+        console.error("Dados de pacientes inválidos:", data)
+        setPacientes([])
+        setTotalPaginas(1)
+      }
     } catch (error) {
       console.error("Erro ao carregar pacientes:", error)
       setPacientes([])

@@ -11,23 +11,28 @@ export async function GET(request: Request) {
     const orderBy = searchParams.get("orderBy") || "createdAt"
     const order = (searchParams.get("order") || "desc") as Prisma.SortOrder
 
+    console.log("Parâmetros de busca:", { busca, page, limit, orderBy, order })
+
     // Calcula o offset para paginação
     const skip = (page - 1) * limit
 
     // Constrói a query de busca
-    const where: Prisma.UserWhereInput = busca
-      ? {
-          tipo: "paciente",
-          OR: [
-            { nome: { contains: busca, mode: "insensitive" } },
-            { email: { contains: busca, mode: "insensitive" } },
-            { telefone: { contains: busca } },
-          ],
-        }
-      : { tipo: "paciente" }
+    const where: Prisma.UserWhereInput = {
+      tipo: "paciente",
+      ...(busca && {
+        OR: [
+          { nome: { contains: busca, mode: "insensitive" } },
+          { email: { contains: busca, mode: "insensitive" } },
+          { telefone: { contains: busca } },
+        ],
+      }),
+    }
+
+    console.log("Query where:", where)
 
     // Busca total de pacientes para paginação
     const total = await prisma.user.count({ where })
+    console.log("Total de pacientes encontrados:", total)
 
     // Busca os pacientes com filtros
     const pacientes = await prisma.user.findMany({
@@ -45,6 +50,8 @@ export async function GET(request: Request) {
       skip,
       take: limit,
     })
+
+    console.log("Pacientes encontrados:", pacientes.length)
 
     // Busca última e próxima consulta para cada paciente
     const pacientesComConsultas = await Promise.all(
@@ -82,11 +89,19 @@ export async function GET(request: Request) {
       })
     )
 
-    return NextResponse.json({
+    const response = {
       pacientes: pacientesComConsultas,
       paginas: Math.max(1, Math.ceil(total / limit)),
       total,
+    }
+
+    console.log("Resposta final:", {
+      totalPacientes: response.pacientes.length,
+      paginas: response.paginas,
+      total: response.total
     })
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error("Erro ao buscar pacientes:", error)
     return NextResponse.json(
