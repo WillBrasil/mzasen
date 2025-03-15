@@ -1,6 +1,23 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+export async function GET() {
+  try {
+    const agendamentos = await prisma.agendamento.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    return NextResponse.json({ agendamentos })
+  } catch (error) {
+    console.error("Erro ao buscar agendamentos:", error)
+    return NextResponse.json({ 
+      error: "Erro ao buscar agendamentos" 
+    }, { status: 500 })
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json()

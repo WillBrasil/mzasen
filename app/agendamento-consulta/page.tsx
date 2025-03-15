@@ -118,7 +118,7 @@ export default function AgendamentoConsultaPage() {
               </Link>
               <div className="space-y-2">
                 <div className="inline-block rounded-lg bg-terra-100 px-3 py-1 text-sm text-terra-700">
-                  Consulta Gratuita
+                  Agendamento
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl text-terra-900">
                   Agende Sua Consulta

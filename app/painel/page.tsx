@@ -139,6 +139,22 @@ export default function PainelPage() {
                   </p>
                 </CardContent>
               </Card>
+
+              <Card className="bg-white">
+                <CardHeader>
+                  <CardTitle>Agendamentos</CardTitle>
+                  <CardDescription>Gerencie os agendamentos de consultas</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={() => router.push("/painel/agendamentos")}
+                    className="w-full bg-sage-600 hover:bg-sage-700"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Ver Agendamentos
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
