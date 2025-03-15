@@ -24,7 +24,6 @@ model User {
   tipo           String   @default("paciente")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  agendamentos   Agendamento[]
 
   @@map("users")
 }
