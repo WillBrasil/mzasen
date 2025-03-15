@@ -92,7 +92,7 @@ export default function PainelProfissionalPage() {
         busca: busca,
         page: pagina.toString(),
         limit: "5", // Limitado a 5 pacientes por página
-        orderBy: "cadastradoEm", // Ordenar por data de cadastro
+        orderBy: "createdAt", // Corrigido para usar o nome correto do campo
         order: "desc" // Ordem decrescente (mais recentes primeiro)
       }).toString()
 
