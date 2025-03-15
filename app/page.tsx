@@ -29,9 +29,9 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/consulta-gratuita">
+                  <Link href="/agendar">
                     <Button size="lg" className="bg-sage-600 hover:bg-sage-700 w-full sm:w-auto">
-                      Consulta Gratuita
+                      Agende sua Consulta
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>

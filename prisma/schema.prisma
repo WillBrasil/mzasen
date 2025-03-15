@@ -26,3 +26,18 @@ model User {
 
   @@map("users")
 }
+
+model Agendamento {
+  id                String   @id @default(cuid())
+  nome             String
+  email            String
+  telefone         String
+  preferenciaContato String
+  periodoConsulta   String
+  servicoInteresse  String
+  status           String   @default("pendente")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("agendamentos")
+}
