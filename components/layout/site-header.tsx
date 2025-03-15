@@ -13,8 +13,10 @@ export function SiteHeader() {
   const pathname = usePathname()
   const isHomePage = pathname === "/"
   const [isScrolled, setIsScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
     }
@@ -28,6 +30,7 @@ export function SiteHeader() {
   }
 
   const isActive = (path: string) => {
+    if (!mounted) return false
     if (isHomePage) {
       return pathname === "/" && window.location.hash === path
     }
