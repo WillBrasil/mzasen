@@ -5,7 +5,9 @@ import { ptBR } from "date-fns/locale"
 
 export async function GET(request: Request) {
   try {
+    // Extrai o ID do paciente da URL
     const id = request.url.split("/pacientes/")[1].split("/consultas")[0]
+    console.log("ID do paciente recebido:", id)
 
     // Primeiro busca o paciente para pegar email
     const paciente = await prisma.user.findUnique({
@@ -14,9 +16,12 @@ export async function GET(request: Request) {
         tipo: "paciente"
       },
       select: {
+        id: true,
         email: true
       }
     })
+
+    console.log("Paciente encontrado:", paciente)
 
     if (!paciente) {
       return NextResponse.json(
@@ -28,12 +33,23 @@ export async function GET(request: Request) {
     // Busca todas as consultas do paciente
     const consultasDB = await prisma.agendamento.findMany({
       where: {
-        email: paciente.email
+        email: paciente.email // Usando o email do paciente
       },
-      orderBy: {
-        data: "desc"
+      orderBy: [
+        { data: "desc" },
+        { horario: "desc" }
+      ],
+      select: {
+        id: true,
+        data: true,
+        horario: true,
+        status: true,
+        servico: true,
+        email: true
       }
     })
+
+    console.log("Consultas encontradas:", consultasDB)
 
     // Formata as datas das consultas
     const consultas = consultasDB.map(consulta => ({
@@ -43,6 +59,8 @@ export async function GET(request: Request) {
       status: consulta.status,
       servico: consulta.servico
     }))
+
+    console.log("Consultas formatadas:", consultas)
 
     return NextResponse.json({ consultas })
   } catch (error) {
