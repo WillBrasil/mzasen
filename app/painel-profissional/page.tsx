@@ -39,6 +39,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface Paciente {
   id: string
@@ -234,15 +235,32 @@ export default function PainelProfissionalPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-yellow-600 bg-yellow-50 p-3 rounded-lg">
-                    <Bell className="h-4 w-4" />
-                    <p className="text-sm">2 consultas precisam de confirmação</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
-                    <FileText className="h-4 w-4" />
-                    <p className="text-sm">3 planos alimentares para atualizar</p>
-                  </div>
+                <div className="space-y-3">
+                  {consultasHoje.filter(c => c.status === "pendente").length > 0 && (
+                    <Alert className="bg-yellow-50 border-yellow-200">
+                      <Bell className="h-4 w-4 text-yellow-600" />
+                      <AlertTitle className="text-yellow-800">
+                        Consultas Pendentes
+                      </AlertTitle>
+                      <AlertDescription className="text-yellow-700">
+                        {consultasHoje.filter(c => c.status === "pendente").length}{" "}
+                        {consultasHoje.filter(c => c.status === "pendente").length === 1
+                          ? "consulta precisa"
+                          : "consultas precisam"} de confirmação
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* TODO: Implementar lógica real para planos alimentares */}
+                  <Alert className="bg-blue-50 border-blue-200">
+                    <FileText className="h-4 w-4 text-blue-600" />
+                    <AlertTitle className="text-blue-800">
+                      Planos Alimentares
+                    </AlertTitle>
+                    <AlertDescription className="text-blue-700">
+                      3 planos alimentares precisam de atualização
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </CardContent>
             </Card>
