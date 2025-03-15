@@ -30,11 +30,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    // Verificar se há um usuário salvo no localStorage
+    // Verificar se há um token salvo
+    const token = localStorage.getItem("token")
     const storedUser = localStorage.getItem("user")
-    if (storedUser) {
+    
+    if (token && storedUser) {
       setUser(JSON.parse(storedUser))
     }
+    
     setLoading(false)
   }, [])
 
@@ -43,24 +46,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true)
       setError(null)
       
-      // Simulando uma chamada à API
-      // TODO: Implementar chamada real à API
-      if (email === "teste@exemplo.com" && senha === "123456") {
-        const mockUser: User = {
-          id: "1",
-          nome: "Usuário Teste",
-          email,
-          cpf: "000.000.000-00",
-          telefone: "(00) 00000-0000",
-          dataNascimento: "1990-01-01"
-        }
-        
-        setUser(mockUser)
-        localStorage.setItem("user", JSON.stringify(mockUser))
-        router.push("/painel")
-      } else {
-        throw new Error("Credenciais inválidas")
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, senha }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao fazer login')
       }
+
+      setUser(data.user)
+      localStorage.setItem("token", data.token)
+      localStorage.setItem("user", JSON.stringify(data.user))
+      router.push("/painel")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login")
     } finally {
@@ -73,15 +76,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true)
       setError(null)
       
-      // Simulando uma chamada à API
-      // TODO: Implementar chamada real à API
-      const mockUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
-        ...userData
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao registrar')
       }
-      
-      setUser(mockUser)
-      localStorage.setItem("user", JSON.stringify(mockUser))
+
+      setUser(data.user)
+      localStorage.setItem("token", data.token)
+      localStorage.setItem("user", JSON.stringify(data.user))
       router.push("/painel")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao registrar")
@@ -92,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null)
+    localStorage.removeItem("token")
     localStorage.removeItem("user")
     router.push("/")
   }

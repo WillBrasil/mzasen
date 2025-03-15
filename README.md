@@ -1,14 +1,58 @@
-# MzaSen - Nutrição e Bem-Estar
+# MzaSen - Sistema de Nutrição e Bem-Estar
 
-Site profissional desenvolvido para a nutricionista MzaSen, oferecendo serviços de nutrição e bem-estar. O projeto foi construído utilizando tecnologias modernas para proporcionar uma experiência de usuário excepcional.
+## Configuração do Ambiente
+
+1. Clone o repositório:
+```bash
+git clone [url-do-repositorio]
+cd mzasen
+```
+
+2. Instale as dependências:
+```bash
+npm install
+```
+
+3. Configure as variáveis de ambiente:
+```bash
+cp .env.example .env
+```
+Edite o arquivo `.env` com suas configurações:
+- `DATABASE_URL`: URL de conexão com o banco de dados PostgreSQL
+- `JWT_SECRET`: Chave secreta para geração de tokens JWT
+
+4. Configure o banco de dados:
+```bash
+npx prisma migrate dev
+```
+
+5. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
+
+## Scripts Disponíveis
+
+- `npm run dev`: Inicia o servidor de desenvolvimento
+- `npm run build`: Gera o build de produção
+- `npm start`: Inicia o servidor em modo produção
+- `npm run lint`: Executa o linter
 
 ## Tecnologias Utilizadas
 
-- [Next.js 14](https://nextjs.org/) - Framework React para produção
-- [React](https://reactjs.org/) - Biblioteca JavaScript para construção de interfaces
-- [TypeScript](https://www.typescriptlang.org/) - Superset JavaScript com tipagem estática
-- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utilitário
-- [Shadcn/ui](https://ui.shadcn.com/) - Componentes de UI reutilizáveis
+- Next.js 15
+- PostgreSQL
+- Prisma
+- TypeScript
+- TailwindCSS
+- JWT para autenticação
+
+## Estrutura do Projeto
+
+- `/app`: Páginas e rotas da aplicação
+- `/components`: Componentes reutilizáveis
+- `/lib`: Utilitários e configurações
+- `/prisma`: Schema e migrações do banco de dados
 
 ## Funcionalidades
 
@@ -18,37 +62,6 @@ Site profissional desenvolvido para a nutricionista MzaSen, oferecendo serviços
 - Painel administrativo
 - Design responsivo
 - Interface moderna e intuitiva
-
-## Como Executar o Projeto
-
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/mzasen.git
-```
-
-2. Instale as dependências:
-```bash
-cd mzasen
-npm install
-```
-
-3. Execute o servidor de desenvolvimento:
-```bash
-npm run dev
-```
-
-4. Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
-
-## Estrutura do Projeto
-
-```
-mzasen/
-├── app/                    # Páginas e rotas da aplicação
-├── components/            # Componentes reutilizáveis
-├── lib/                   # Utilitários e configurações
-├── public/               # Arquivos estáticos
-└── styles/               # Estilos globais
-```
 
 ## Contribuindo
 
