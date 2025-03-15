@@ -29,7 +29,7 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/agendar">
+                  <Link href="/agendamento-consulta">
                     <Button size="lg" className="bg-sage-600 hover:bg-sage-700 w-full sm:w-auto">
                       Agende sua Consulta
                       <ChevronRight className="ml-2 h-4 w-4" />
@@ -303,7 +303,7 @@ export default function Home() {
                   especialistas irão desenvolver um plano personalizado para você.
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/consulta-gratuita">
+                  <Link href="/agendamento-consulta">
                     <Button size="lg" className="gap-2 bg-sage-600 hover:bg-sage-700 w-full sm:w-auto">
                       <Calendar className="h-5 w-5" />
                       Agendar Agora

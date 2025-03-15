@@ -70,10 +70,10 @@ export default function ConsultaGratuitaPage() {
               </Link>
               <div className="space-y-2">
                 <div className="inline-block rounded-lg bg-terra-100 px-3 py-1 text-sm text-terra-700">
-                  Consulta Gratuita
+                  Agendamento
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl text-terra-900">
-                  Agende Sua Consulta Gratuita
+                  Agende Sua Consulta
                 </h1>
                 <p className="max-w-[900px] text-terra-700 md:text-xl/relaxed">
                   Dê o primeiro passo para uma vida mais saudável. Nossa consulta inicial é gratuita e sem compromisso.
@@ -96,7 +96,7 @@ export default function ConsultaGratuitaPage() {
 
                   <Card className="border-terra-200 bg-white">
                     <CardHeader>
-                      <CardTitle className="text-terra-800">Por que agendar uma consulta gratuita?</CardTitle>
+                      <CardTitle className="text-terra-800">Por que agendar uma consulta?</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-start gap-3">
