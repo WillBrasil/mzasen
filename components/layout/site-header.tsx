@@ -80,7 +80,7 @@ export function SiteHeader() {
               Entrar
             </Button>
           </Link>
-          <Link href="/consulta-gratuita" className="hidden md:inline-flex">
+          <Link href="/agendamento-consulta" className="hidden md:inline-flex">
             <Button 
               className="bg-sage-600 hover:bg-sage-700 transition-all duration-300 shadow-lg hover:shadow-sage-200/50"
             >

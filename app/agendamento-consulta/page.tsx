@@ -121,10 +121,10 @@ export default function AgendamentoConsultaPage() {
                   Consulta Gratuita
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl text-terra-900">
-                  Agende Sua Consulta Gratuita
+                  Agende Sua Consulta
                 </h1>
                 <p className="max-w-[900px] text-terra-700 md:text-xl/relaxed">
-                  Dê o primeiro passo para uma vida mais saudável. Nossa consulta inicial é gratuita e sem compromisso.
+                  Dê o primeiro passo para uma vida mais saudável. Nossa consulta inicial.
                 </p>
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function AgendamentoConsultaPage() {
 
                   <Card className="border-terra-200 bg-white">
                     <CardHeader>
-                      <CardTitle className="text-terra-800">Por que agendar uma consulta gratuita?</CardTitle>
+                      <CardTitle className="text-terra-800">Por que agendar uma consulta?</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-start gap-3">
@@ -177,7 +177,7 @@ export default function AgendamentoConsultaPage() {
                   <CardHeader>
                     <CardTitle className="text-terra-800">Preencha o formulário</CardTitle>
                     <CardDescription className="text-terra-600">
-                      Informe seus dados para agendarmos sua consulta gratuita
+                      Informe seus dados para agendarmos sua consulta
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -188,7 +188,7 @@ export default function AgendamentoConsultaPage() {
                         </div>
                         <h3 className="text-xl font-bold text-terra-800">Agendamento Recebido!</h3>
                         <p className="text-terra-700">
-                          Entraremos em contato em breve para confirmar sua consulta gratuita.
+                          Entraremos em contato em breve para confirmar sua consulta.
                         </p>
                       </div>
                     ) : (
