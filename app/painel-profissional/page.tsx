@@ -74,24 +74,55 @@ export default function PainelProfissionalPage() {
       return
     }
     carregarDados()
-  }, [user, router, busca, pagina])
+  }, [user, router])
+
+  useEffect(() => {
+    if (user?.tipo === "profissional") {
+      const timer = setTimeout(() => {
+        carregarPacientes()
+      }, 500) // Debounce de 500ms
+
+      return () => clearTimeout(timer)
+    }
+  }, [busca, pagina])
+
+  const carregarPacientes = async () => {
+    try {
+      const queryParams = new URLSearchParams({
+        busca: busca,
+        page: pagina.toString(),
+        limit: "5", // Limitado a 5 pacientes por página
+        orderBy: "cadastradoEm", // Ordenar por data de cadastro
+        order: "desc" // Ordem decrescente (mais recentes primeiro)
+      }).toString()
+
+      const response = await fetch(`/api/pacientes?${queryParams}`)
+      
+      if (!response.ok) {
+        throw new Error("Erro ao carregar pacientes")
+      }
+
+      const data = await response.json()
+      setPacientes(data.pacientes)
+      setTotalPaginas(data.paginas)
+    } catch (error) {
+      console.error("Erro ao carregar pacientes:", error)
+    }
+  }
 
   const carregarDados = async () => {
     try {
-      const [pacientesRes, consultasRes] = await Promise.all([
-        fetch(`/api/pacientes?busca=${busca}&page=${pagina}&limit=10`),
+      setIsLoading(true)
+      const [consultasRes] = await Promise.all([
         fetch("/api/consultas/hoje"),
+        carregarPacientes()
       ])
 
-      if (!pacientesRes.ok || !consultasRes.ok) {
+      if (!consultasRes.ok) {
         throw new Error("Erro ao carregar dados")
       }
 
-      const pacientesData = await pacientesRes.json()
       const consultasData = await consultasRes.json()
-
-      setPacientes(pacientesData.pacientes)
-      setTotalPaginas(pacientesData.paginas)
       setConsultasHoje(consultasData.consultas)
     } catch (error) {
       console.error("Erro ao carregar dados:", error)
@@ -102,7 +133,7 @@ export default function PainelProfissionalPage() {
 
   const handleBuscaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBusca(e.target.value)
-    setPagina(1)
+    setPagina(1) // Reset da página ao buscar
   }
 
   if (!user) {
