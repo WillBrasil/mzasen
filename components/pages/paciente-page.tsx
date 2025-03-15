@@ -68,36 +68,36 @@ export function PacientePage({ params }: PacientePageProps) {
   const router = useRouter()
 
   useEffect(() => {
+    async function carregarDados() {
+      try {
+        const [pacienteRes, consultasRes, planoRes] = await Promise.all([
+          fetch(`/api/pacientes/${params.id}`),
+          fetch(`/api/pacientes/${params.id}/consultas`),
+          fetch(`/api/pacientes/${params.id}/plano-alimentar`),
+        ])
+
+        if (!pacienteRes.ok || !consultasRes.ok || !planoRes.ok) {
+          throw new Error("Erro ao carregar dados")
+        }
+
+        const [pacienteData, consultasData, planoData] = await Promise.all([
+          pacienteRes.json(),
+          consultasRes.json(),
+          planoRes.json(),
+        ])
+
+        setPaciente(pacienteData.paciente)
+        setConsultas(consultasData.consultas)
+        setPlanoAlimentar(planoData.plano)
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     carregarDados()
   }, [params.id])
-
-  const carregarDados = async () => {
-    try {
-      const [pacienteRes, consultasRes, planoRes] = await Promise.all([
-        fetch(`/api/pacientes/${params.id}`),
-        fetch(`/api/pacientes/${params.id}/consultas`),
-        fetch(`/api/pacientes/${params.id}/plano-alimentar`),
-      ])
-
-      if (!pacienteRes.ok || !consultasRes.ok || !planoRes.ok) {
-        throw new Error("Erro ao carregar dados")
-      }
-
-      const [pacienteData, consultasData, planoData] = await Promise.all([
-        pacienteRes.json(),
-        consultasRes.json(),
-        planoRes.json(),
-      ])
-
-      setPaciente(pacienteData.paciente)
-      setConsultas(consultasData.consultas)
-      setPlanoAlimentar(planoData.plano)
-    } catch (error) {
-      console.error("Erro ao carregar dados:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   if (isLoading) {
     return <div className="container py-8">Carregando...</div>
