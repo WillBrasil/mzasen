@@ -8,8 +8,20 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/lib/auth"
+import { 
+  validateCPF, 
+  validatePhone, 
+  validateEmail, 
+  validatePassword,
+  validateDate,
+  formatCPF,
+  formatPhone
+} from "@/lib/utils/validation"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function RegistroPage() {
+  const { register, loading, error } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     nome: "",
@@ -20,19 +32,109 @@ export default function RegistroPage() {
     senha: "",
     confirmarSenha: "",
   })
+  const [formErrors, setFormErrors] = useState({
+    nome: "",
+    email: "",
+    cpf: "",
+    telefone: "",
+    dataNascimento: "",
+    senha: "",
+    confirmarSenha: "",
+  })
+
+  const validateForm = () => {
+    const errors = {
+      nome: "",
+      email: "",
+      cpf: "",
+      telefone: "",
+      dataNascimento: "",
+      senha: "",
+      confirmarSenha: "",
+    }
+
+    if (!formData.nome) {
+      errors.nome = "Nome é obrigatório"
+    } else if (formData.nome.length < 3) {
+      errors.nome = "Nome deve ter pelo menos 3 caracteres"
+    }
+
+    if (!formData.email) {
+      errors.email = "E-mail é obrigatório"
+    } else if (!validateEmail(formData.email)) {
+      errors.email = "E-mail inválido"
+    }
+
+    if (!formData.cpf) {
+      errors.cpf = "CPF é obrigatório"
+    } else if (!validateCPF(formData.cpf)) {
+      errors.cpf = "CPF inválido"
+    }
+
+    if (!formData.telefone) {
+      errors.telefone = "Telefone é obrigatório"
+    } else if (!validatePhone(formData.telefone)) {
+      errors.telefone = "Telefone inválido"
+    }
+
+    if (!formData.dataNascimento) {
+      errors.dataNascimento = "Data de nascimento é obrigatória"
+    } else if (!validateDate(formData.dataNascimento)) {
+      errors.dataNascimento = "Data de nascimento inválida"
+    }
+
+    if (!formData.senha) {
+      errors.senha = "Senha é obrigatória"
+    } else if (!validatePassword(formData.senha)) {
+      errors.senha = "Senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula e um número"
+    }
+
+    if (!formData.confirmarSenha) {
+      errors.confirmarSenha = "Confirmação de senha é obrigatória"
+    } else if (formData.senha !== formData.confirmarSenha) {
+      errors.confirmarSenha = "As senhas não coincidem"
+    }
+
+    setFormErrors(errors)
+    return !Object.values(errors).some(Boolean)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Aqui você implementará a lógica de registro
-    console.log("Dados do formulário:", formData)
+    
+    if (!validateForm()) return
+    
+    try {
+      const { confirmarSenha, ...userData } = formData
+      await register(userData)
+    } catch (err) {
+      console.error("Erro ao registrar:", err)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+    let formattedValue = value
+
+    // Aplica formatação para CPF e telefone
+    if (name === "cpf") {
+      formattedValue = formatCPF(value)
+    } else if (name === "telefone") {
+      formattedValue = formatPhone(value)
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: formattedValue,
     }))
+
+    // Limpa o erro do campo quando o usuário começa a digitar
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }))
+    }
   }
 
   return (
@@ -92,6 +194,12 @@ export default function RegistroPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+
                   <div className="grid gap-2">
                     <Label htmlFor="nome">Nome Completo</Label>
                     <Input
@@ -101,7 +209,11 @@ export default function RegistroPage() {
                       value={formData.nome}
                       onChange={handleChange}
                       required
+                      className={formErrors.nome ? "border-red-500" : ""}
                     />
+                    {formErrors.nome && (
+                      <p className="text-sm text-red-500">{formErrors.nome}</p>
+                    )}
                   </div>
 
                   <div className="grid gap-2">
@@ -114,7 +226,11 @@ export default function RegistroPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
+                      className={formErrors.email ? "border-red-500" : ""}
                     />
+                    {formErrors.email && (
+                      <p className="text-sm text-red-500">{formErrors.email}</p>
+                    )}
                   </div>
 
                   <div className="grid gap-2">
@@ -126,7 +242,12 @@ export default function RegistroPage() {
                       value={formData.cpf}
                       onChange={handleChange}
                       required
+                      maxLength={14}
+                      className={formErrors.cpf ? "border-red-500" : ""}
                     />
+                    {formErrors.cpf && (
+                      <p className="text-sm text-red-500">{formErrors.cpf}</p>
+                    )}
                   </div>
 
                   <div className="grid gap-2">
@@ -138,7 +259,12 @@ export default function RegistroPage() {
                       value={formData.telefone}
                       onChange={handleChange}
                       required
+                      maxLength={15}
+                      className={formErrors.telefone ? "border-red-500" : ""}
                     />
+                    {formErrors.telefone && (
+                      <p className="text-sm text-red-500">{formErrors.telefone}</p>
+                    )}
                   </div>
 
                   <div className="grid gap-2">
@@ -150,7 +276,11 @@ export default function RegistroPage() {
                       value={formData.dataNascimento}
                       onChange={handleChange}
                       required
+                      className={formErrors.dataNascimento ? "border-red-500" : ""}
                     />
+                    {formErrors.dataNascimento && (
+                      <p className="text-sm text-red-500">{formErrors.dataNascimento}</p>
+                    )}
                   </div>
 
                   <div className="grid gap-2">
@@ -164,6 +294,7 @@ export default function RegistroPage() {
                         value={formData.senha}
                         onChange={handleChange}
                         required
+                        className={formErrors.senha ? "border-red-500" : ""}
                       />
                       <button
                         type="button"
@@ -177,6 +308,9 @@ export default function RegistroPage() {
                         )}
                       </button>
                     </div>
+                    {formErrors.senha && (
+                      <p className="text-sm text-red-500">{formErrors.senha}</p>
+                    )}
                   </div>
 
                   <div className="grid gap-2">
@@ -190,12 +324,20 @@ export default function RegistroPage() {
                         value={formData.confirmarSenha}
                         onChange={handleChange}
                         required
+                        className={formErrors.confirmarSenha ? "border-red-500" : ""}
                       />
                     </div>
+                    {formErrors.confirmarSenha && (
+                      <p className="text-sm text-red-500">{formErrors.confirmarSenha}</p>
+                    )}
                   </div>
 
-                  <Button type="submit" className="w-full bg-sage-600 hover:bg-sage-700">
-                    Criar Conta
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-sage-600 hover:bg-sage-700"
+                    disabled={loading}
+                  >
+                    {loading ? "Criando conta..." : "Criar Conta"}
                   </Button>
 
                   <p className="text-center text-sm text-sage-600">

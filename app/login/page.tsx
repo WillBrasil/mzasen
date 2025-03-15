@@ -8,18 +8,52 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/lib/auth"
+import { validateEmail } from "@/lib/utils/validation"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function LoginPage() {
+  const { login, loading, error } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     senha: "",
   })
+  const [formErrors, setFormErrors] = useState({
+    email: "",
+    senha: "",
+  })
+
+  const validateForm = () => {
+    const errors = {
+      email: "",
+      senha: "",
+    }
+
+    if (!formData.email) {
+      errors.email = "E-mail é obrigatório"
+    } else if (!validateEmail(formData.email)) {
+      errors.email = "E-mail inválido"
+    }
+
+    if (!formData.senha) {
+      errors.senha = "Senha é obrigatória"
+    }
+
+    setFormErrors(errors)
+    return !Object.values(errors).some(Boolean)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Aqui você implementará a lógica de login
-    console.log("Dados do formulário:", formData)
+    
+    if (!validateForm()) return
+    
+    try {
+      await login(formData.email, formData.senha)
+    } catch (err) {
+      console.error("Erro ao fazer login:", err)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,6 +62,13 @@ export default function LoginPage() {
       ...prev,
       [name]: value,
     }))
+    // Limpa o erro do campo quando o usuário começa a digitar
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }))
+    }
   }
 
   return (
@@ -87,6 +128,12 @@ export default function LoginPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+
                   <div className="grid gap-2">
                     <Label htmlFor="email">E-mail</Label>
                     <Input
@@ -97,7 +144,11 @@ export default function LoginPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
+                      className={formErrors.email ? "border-red-500" : ""}
                     />
+                    {formErrors.email && (
+                      <p className="text-sm text-red-500">{formErrors.email}</p>
+                    )}
                   </div>
 
                   <div className="grid gap-2">
@@ -111,6 +162,7 @@ export default function LoginPage() {
                         value={formData.senha}
                         onChange={handleChange}
                         required
+                        className={formErrors.senha ? "border-red-500" : ""}
                       />
                       <button
                         type="button"
@@ -124,6 +176,9 @@ export default function LoginPage() {
                         )}
                       </button>
                     </div>
+                    {formErrors.senha && (
+                      <p className="text-sm text-red-500">{formErrors.senha}</p>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -132,8 +187,12 @@ export default function LoginPage() {
                     </Link>
                   </div>
 
-                  <Button type="submit" className="w-full bg-sage-600 hover:bg-sage-700">
-                    Entrar
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-sage-600 hover:bg-sage-700"
+                    disabled={loading}
+                  >
+                    {loading ? "Entrando..." : "Entrar"}
                   </Button>
 
                   <p className="text-center text-sm text-sage-600">
