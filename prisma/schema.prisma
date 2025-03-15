@@ -37,6 +37,9 @@ model Agendamento {
   periodo           String
   servico          String
   status           String   @default("pendente")
+  data             String
+  horario          String
+  profissional     String   @default("Dra. Maria Zanetti")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

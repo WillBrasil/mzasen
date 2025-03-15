@@ -36,11 +36,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedUser = localStorage.getItem("user")
     
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser))
+      const user = JSON.parse(storedUser)
+      setUser(user)
+      
+      // Redireciona para a página correta se já estiver logado
+      if (user.tipo === "profissional") {
+        router.push("/painel-profissional")
+      } else {
+        router.push("/painel-paciente")
+      }
     }
     
     setLoading(false)
-  }, [])
+  }, [router])
 
   const login = async (email: string, senha: string) => {
     try {
@@ -69,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.user.tipo === "profissional") {
         router.push("/painel-profissional")
       } else {
-        router.push("/painel")
+        router.push("/painel-paciente")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login")
@@ -100,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(data.user)
       localStorage.setItem("token", data.token)
       localStorage.setItem("user", JSON.stringify(data.user))
-      router.push("/painel")
+      router.push("/painel-paciente")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao registrar")
     } finally {
