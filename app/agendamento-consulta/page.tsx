@@ -16,18 +16,66 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { MobileMenu } from "@/components/mobile-menu"
 
-export default function ConsultaGratuitaPage() {
+interface FormData {
+  nome: string
+  email: string
+  telefone: string
+  preferencia_contato: string
+  periodo: string
+  servico: string
+}
+
+export default function AgendamentoConsultaPage() {
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState<FormData>({
+    nome: "",
+    email: "",
+    telefone: "",
+    preferencia_contato: "whatsapp",
+    periodo: "manha",
+    servico: "",
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Aqui você adicionaria a lógica para processar o formulário
-    setFormSubmitted(true)
+    setIsLoading(true)
 
-    // Simular um reset do formulário após 5 segundos
-    setTimeout(() => {
-      setFormSubmitted(false)
-    }, 5000)
+    try {
+      const response = await fetch("/api/agendamentos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erro ao processar agendamento")
+      }
+
+      setFormSubmitted(true)
+      setFormData({
+        nome: "",
+        email: "",
+        telefone: "",
+        preferencia_contato: "whatsapp",
+        periodo: "manha",
+        servico: "",
+      })
+    } catch (error) {
+      console.error("Erro ao enviar formulário:", error)
+      alert("Erro ao processar seu agendamento. Por favor, tente novamente.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -53,7 +101,7 @@ export default function ConsultaGratuitaPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Link href="/consulta-gratuita" className="hidden md:inline-flex">
+            <Link href="/agendamento-consulta" className="hidden md:inline-flex">
               <Button className="bg-sage-600 hover:bg-sage-700">Agendar Consulta</Button>
             </Link>
             <MobileMenu />
@@ -70,10 +118,10 @@ export default function ConsultaGratuitaPage() {
               </Link>
               <div className="space-y-2">
                 <div className="inline-block rounded-lg bg-terra-100 px-3 py-1 text-sm text-terra-700">
-                  Agendamento
+                  Consulta Gratuita
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl text-terra-900">
-                  Agende Sua Consulta
+                  Agende Sua Consulta Gratuita
                 </h1>
                 <p className="max-w-[900px] text-terra-700 md:text-xl/relaxed">
                   Dê o primeiro passo para uma vida mais saudável. Nossa consulta inicial é gratuita e sem compromisso.
@@ -96,7 +144,7 @@ export default function ConsultaGratuitaPage() {
 
                   <Card className="border-terra-200 bg-white">
                     <CardHeader>
-                      <CardTitle className="text-terra-800">Por que agendar uma consulta?</CardTitle>
+                      <CardTitle className="text-terra-800">Por que agendar uma consulta gratuita?</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-start gap-3">
@@ -146,11 +194,13 @@ export default function ConsultaGratuitaPage() {
                     ) : (
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="name" className="text-terra-700">
+                          <Label htmlFor="nome" className="text-terra-700">
                             Nome Completo
                           </Label>
                           <Input
-                            id="name"
+                            id="nome"
+                            value={formData.nome}
+                            onChange={(e) => handleChange("nome", e.target.value)}
                             placeholder="Digite seu nome completo"
                             required
                             className="border-terra-300 focus-visible:ring-terra-500"
@@ -164,6 +214,8 @@ export default function ConsultaGratuitaPage() {
                           <Input
                             id="email"
                             type="email"
+                            value={formData.email}
+                            onChange={(e) => handleChange("email", e.target.value)}
                             placeholder="seu.email@exemplo.com"
                             required
                             className="border-terra-300 focus-visible:ring-terra-500"
@@ -171,11 +223,13 @@ export default function ConsultaGratuitaPage() {
                         </div>
 
                         <div className="grid gap-2">
-                          <Label htmlFor="phone" className="text-terra-700">
+                          <Label htmlFor="telefone" className="text-terra-700">
                             Telefone
                           </Label>
                           <Input
-                            id="phone"
+                            id="telefone"
+                            value={formData.telefone}
+                            onChange={(e) => handleChange("telefone", e.target.value)}
                             placeholder="(00) 00000-0000"
                             required
                             className="border-terra-300 focus-visible:ring-terra-500"
@@ -184,7 +238,11 @@ export default function ConsultaGratuitaPage() {
 
                         <div className="grid gap-2">
                           <Label className="text-terra-700">Preferência de Contato</Label>
-                          <RadioGroup defaultValue="whatsapp" className="flex flex-wrap gap-4">
+                          <RadioGroup 
+                            value={formData.preferencia_contato}
+                            onValueChange={(value) => handleChange("preferencia_contato", value)}
+                            className="flex flex-wrap gap-4"
+                          >
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="whatsapp" id="whatsapp" className="text-terra-600" />
                               <Label htmlFor="whatsapp" className="text-terra-700">
@@ -208,7 +266,11 @@ export default function ConsultaGratuitaPage() {
 
                         <div className="grid gap-2">
                           <Label className="text-terra-700">Melhor período para consulta</Label>
-                          <RadioGroup defaultValue="manha" className="flex flex-wrap gap-4">
+                          <RadioGroup 
+                            value={formData.periodo}
+                            onValueChange={(value) => handleChange("periodo", value)}
+                            className="flex flex-wrap gap-4"
+                          >
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="manha" id="manha" className="text-terra-600" />
                               <Label htmlFor="manha" className="text-terra-700">
@@ -231,10 +293,13 @@ export default function ConsultaGratuitaPage() {
                         </div>
 
                         <div className="grid gap-2">
-                          <Label htmlFor="service" className="text-terra-700">
+                          <Label htmlFor="servico" className="text-terra-700">
                             Serviço de Interesse
                           </Label>
-                          <Select>
+                          <Select 
+                            value={formData.servico}
+                            onValueChange={(value) => handleChange("servico", value)}
+                          >
                             <SelectTrigger className="border-terra-300 focus-visible:ring-terra-500">
                               <SelectValue placeholder="Selecione um serviço" />
                             </SelectTrigger>
@@ -249,19 +314,12 @@ export default function ConsultaGratuitaPage() {
                           </Select>
                         </div>
 
-                        <div className="grid gap-2">
-                          <Label htmlFor="objective" className="text-terra-700">
-                            Seu principal objetivo
-                          </Label>
-                          <Textarea
-                            id="objective"
-                            placeholder="Conte-nos um pouco sobre o que você espera alcançar com a consulta nutricional"
-                            className="min-h-[100px] border-terra-300 focus-visible:ring-terra-500"
-                          />
-                        </div>
-
-                        <Button type="submit" className="w-full bg-terra-600 hover:bg-terra-700">
-                          Agendar Consulta Gratuita
+                        <Button 
+                          type="submit" 
+                          className="w-full bg-terra-600 hover:bg-terra-700"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? "Enviando..." : "Agendar Consulta"}
                         </Button>
                       </form>
                     )}
