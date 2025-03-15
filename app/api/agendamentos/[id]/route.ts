@@ -1,11 +1,13 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
-  if (!params.id) {
+  request: Request,
+  context: { params: { id: string } }
+) {
+  const id = context.params.id
+
+  if (!id) {
     return NextResponse.json(
       { error: "ID do agendamento é obrigatório" },
       { status: 400 }
@@ -13,9 +15,9 @@ export async function PATCH(
   }
 
   try {
-    const data = await req.json()
+    const data = await request.json()
     const agendamento = await prisma.agendamento.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: data.status,
       },
