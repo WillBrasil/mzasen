@@ -11,6 +11,20 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useAuth } from "@/lib/auth"
 
+interface FormData {
+  nome: string
+  email: string
+  telefone: string
+  notificacoes: {
+    email: boolean
+    whatsapp: boolean
+  }
+  privacidade: {
+    compartilharProgresso: boolean
+    perfilPublico: boolean
+  }
+}
+
 export default function ConfiguracoesPage() {
   const { user } = useAuth()
   const router = useRouter()
@@ -23,7 +37,7 @@ export default function ConfiguracoesPage() {
   }, [user, router])
 
   // Estado para as configurações
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     nome: user?.nome || "",
     email: user?.email || "",
     telefone: user?.telefone || "",
@@ -45,12 +59,12 @@ export default function ConfiguracoesPage() {
     }))
   }
 
-  const handleToggleChange = (field: string, subfield: string) => {
+  const handleToggleChange = (field: keyof Pick<FormData, "notificacoes" | "privacidade">, subfield: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: {
-        ...prev[field as keyof typeof prev],
-        [subfield]: !prev[field as keyof typeof prev][subfield as keyof typeof prev[keyof typeof prev]]
+        ...prev[field],
+        [subfield]: !prev[field][subfield as keyof typeof prev[typeof field]]
       }
     }))
   }
