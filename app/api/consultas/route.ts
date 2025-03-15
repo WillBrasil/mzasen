@@ -1,30 +1,28 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    // TODO: Pegar o ID do usuário do token
     const consultas = await prisma.agendamento.findMany({
+      where: {
+        status: {
+          not: "cancelada"
+        }
+      },
       orderBy: {
         createdAt: "desc"
-      },
-      select: {
-        id: true,
-        data: true,
-        horario: true,
-        status: true,
-        profissional: true,
-        servico: true,
-        nome: true
-      },
-      where: {
-        data: {
-          not: null
-        }
       }
     })
 
-    return NextResponse.json({ consultas })
+    return NextResponse.json({
+      consultas: consultas.map(consulta => ({
+        id: consulta.id,
+        data: consulta.data,
+        horario: consulta.horario,
+        status: consulta.status,
+        paciente: consulta.nome
+      }))
+    })
   } catch (error) {
     console.error("Erro ao buscar consultas:", error)
     return NextResponse.json(
