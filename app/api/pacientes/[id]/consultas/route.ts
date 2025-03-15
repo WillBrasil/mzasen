@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
+    const id = request.url.split("/pacientes/")[1].split("/consultas")[0]
+
     // Primeiro busca o paciente para pegar email
     const paciente = await prisma.user.findUnique({
       where: {
-        id: params.id,
+        id: id,
         tipo: "paciente"
       },
       select: {
@@ -27,21 +26,25 @@ export async function GET(
     // Busca as consultas do paciente pelo email
     const consultas = await prisma.agendamento.findMany({
       where: {
-        email: paciente.email
+        email: paciente.email,
+        status: {
+          not: "cancelada"
+        }
       },
       orderBy: {
         createdAt: "desc"
-      },
-      select: {
-        id: true,
-        data: true,
-        horario: true,
-        status: true,
-        servico: true
       }
     })
 
-    return NextResponse.json({ consultas })
+    const consultasFormatadas = consultas.map(consulta => ({
+      id: consulta.id,
+      data: consulta.data,
+      horario: consulta.horario,
+      status: consulta.status,
+      servico: consulta.servico
+    }))
+
+    return NextResponse.json({ consultas: consultasFormatadas })
   } catch (error) {
     console.error("Erro ao buscar consultas:", error)
     return NextResponse.json(
