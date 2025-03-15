@@ -14,6 +14,7 @@ import {
   Clock,
   CalendarRange
 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -81,6 +82,28 @@ export default function DetalhesPacientePage() {
       console.error("Erro ao carregar dados:", error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const atualizarStatusConsulta = async (consultaId: string, novoStatus: string) => {
+    try {
+      const response = await fetch(`/api/consultas/${consultaId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: novoStatus }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar consulta")
+      }
+
+      await carregarDados()
+      toast.success("Status da consulta atualizado com sucesso!")
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error)
+      toast.error("Erro ao atualizar status da consulta")
     }
   }
 
@@ -209,17 +232,39 @@ export default function DetalhesPacientePage() {
                         </TableCell>
                         <TableCell>{consulta.servico}</TableCell>
                         <TableCell>
-                          <div
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              consulta.status === "confirmada"
-                                ? "bg-green-100 text-green-800"
-                                : consulta.status === "cancelada"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            {consulta.status.charAt(0).toUpperCase() +
-                              consulta.status.slice(1)}
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                consulta.status === "confirmada"
+                                  ? "bg-green-100 text-green-800"
+                                  : consulta.status === "cancelada"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
+                              {consulta.status.charAt(0).toUpperCase() +
+                                consulta.status.slice(1)}
+                            </div>
+                            {consulta.status === "pendente" && (
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800"
+                                  onClick={() => atualizarStatusConsulta(consulta.id, "confirmada")}
+                                >
+                                  Confirmar
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800"
+                                  onClick={() => atualizarStatusConsulta(consulta.id, "cancelada")}
+                                >
+                                  Cancelar
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
