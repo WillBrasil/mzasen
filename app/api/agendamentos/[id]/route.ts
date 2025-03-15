@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-type Context = {
-  params: {
-    id: string
-  }
-}
-
-export async function GET(request: Request, context: Context) {
-  const id = context.params.id
-
+export async function GET(_: any, { params }: any) {
   try {
     const agendamento = await prisma.agendamento.findUnique({
-      where: { id },
+      where: { id: params.id },
     })
 
     if (!agendamento) {
@@ -26,20 +18,11 @@ export async function GET(request: Request, context: Context) {
   }
 }
 
-export async function PATCH(request: Request, context: Context) {
-  const id = context.params.id
-
-  if (!id) {
-    return NextResponse.json(
-      { error: "ID do agendamento é obrigatório" },
-      { status: 400 }
-    )
-  }
-
+export async function PATCH(request: any, { params }: any) {
   try {
     const data = await request.json()
     const agendamento = await prisma.agendamento.update({
-      where: { id },
+      where: { id: params.id },
       data: {
         status: data.status,
       },
