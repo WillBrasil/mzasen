@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-type Params = {
+interface RouteContext {
   params: {
     id: string
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: Params) {
+export async function PATCH(
+  request: NextRequest,
+  context: RouteContext
+) {
   try {
     const data = await request.json()
-    const { id } = params
+    const { id } = context.params
 
     const agendamento = await prisma.agendamento.update({
       where: { id },
