@@ -24,7 +24,6 @@ export async function POST(request: Request) {
         email: true,
         cpf: true,
         telefone: true,
-        dataNascimento: true,
         tipo: true,
         senha: true
       }
