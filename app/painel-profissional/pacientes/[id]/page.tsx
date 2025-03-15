@@ -80,6 +80,10 @@ export default function DetalhesPacientePage() {
       setConsultas(consultasData.consultas)
     } catch (error) {
       console.error("Erro ao carregar dados:", error)
+      toast.error("Erro ao carregar dados do paciente", {
+        duration: 4000,
+        description: "Verifique sua conexão e tente novamente."
+      })
     } finally {
       setIsLoading(false)
     }
@@ -100,10 +104,23 @@ export default function DetalhesPacientePage() {
       }
 
       await carregarDados()
-      toast.success("Status da consulta atualizado com sucesso!")
+      
+      const mensagem = novoStatus === "confirmada" 
+        ? "Consulta confirmada com sucesso! O paciente será notificado."
+        : "Consulta cancelada com sucesso! O paciente será notificado."
+
+      toast.success(mensagem, {
+        duration: 4000,
+        description: format(new Date(), "'Data da atualização:' dd/MM/yyyy 'às' HH:mm", {
+          locale: ptBR
+        })
+      })
     } catch (error) {
       console.error("Erro ao atualizar status:", error)
-      toast.error("Erro ao atualizar status da consulta")
+      toast.error("Não foi possível atualizar o status da consulta", {
+        duration: 4000,
+        description: "Verifique sua conexão e tente novamente."
+      })
     }
   }
 
