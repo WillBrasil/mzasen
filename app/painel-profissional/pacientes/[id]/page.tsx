@@ -12,7 +12,8 @@ import {
   User,
   FileText,
   Clock,
-  CalendarRange
+  CalendarRange,
+  Bell
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -32,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface Paciente {
   id: string
@@ -57,10 +59,21 @@ export default function DetalhesPacientePage() {
   const [paciente, setPaciente] = useState<Paciente | null>(null)
   const [consultas, setConsultas] = useState<Consulta[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [consultasPendentes, setConsultasPendentes] = useState(0)
+  const [planosParaAtualizar, setPlanosParaAtualizar] = useState(0)
 
   useEffect(() => {
     carregarDados()
   }, [])
+
+  useEffect(() => {
+    // Atualiza o contador de consultas pendentes
+    const pendentes = consultas.filter(c => c.status === "pendente").length
+    setConsultasPendentes(pendentes)
+
+    // TODO: Implementar lógica para contar planos alimentares que precisam de atualização
+    setPlanosParaAtualizar(3) // Valor mockado por enquanto
+  }, [consultas])
 
   const carregarDados = async () => {
     try {
@@ -144,6 +157,35 @@ export default function DetalhesPacientePage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
+
+          {(consultasPendentes > 0 || planosParaAtualizar > 0) && (
+            <div className="mb-6 space-y-3">
+              {consultasPendentes > 0 && (
+                <Alert className="bg-yellow-50 border-yellow-200">
+                  <Bell className="h-4 w-4 text-yellow-600" />
+                  <AlertTitle className="text-yellow-800">
+                    Consultas Pendentes
+                  </AlertTitle>
+                  <AlertDescription className="text-yellow-700">
+                    {consultasPendentes} {consultasPendentes === 1 ? 'consulta precisa' : 'consultas precisam'} de confirmação
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {planosParaAtualizar > 0 && (
+                <Alert className="bg-blue-50 border-blue-200">
+                  <FileText className="h-4 w-4 text-blue-600" />
+                  <AlertTitle className="text-blue-800">
+                    Planos Alimentares
+                  </AlertTitle>
+                  <AlertDescription className="text-blue-700">
+                    {planosParaAtualizar} {planosParaAtualizar === 1 ? 'plano alimentar precisa' : 'planos alimentares precisam'} de atualização
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          )}
+
           <h1 className="text-2xl font-bold text-gray-900">
             Detalhes do Paciente
           </h1>
