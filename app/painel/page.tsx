@@ -171,7 +171,12 @@ export default function PainelPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <Button className="w-full">Ver plano completo</Button>
+                    <Button 
+                      className="w-full"
+                      onClick={() => router.push("/painel/plano-alimentar")}
+                    >
+                      Ver plano completo
+                    </Button>
                     <p className="text-sm text-sage-600">
                       Última atualização:{" "}
                       {new Date(userData.ultimaConsulta).toLocaleDateString("pt-BR")}
