@@ -6,12 +6,37 @@ export async function PATCH(request: Request) {
     const id = request.url.split("/consultas/")[1]
     const { status } = await request.json()
 
+    // Valida o status
+    if (!["pendente", "confirmada", "cancelada"].includes(status)) {
+      return NextResponse.json(
+        { error: "Status inválido" },
+        { status: 400 }
+      )
+    }
+
+    // Busca a consulta para verificar se existe
+    const consultaExistente = await prisma.agendamento.findUnique({
+      where: { id }
+    })
+
+    if (!consultaExistente) {
+      return NextResponse.json(
+        { error: "Consulta não encontrada" },
+        { status: 404 }
+      )
+    }
+
+    // Atualiza o status da consulta
     const consulta = await prisma.agendamento.update({
-      where: {
-        id: id
-      },
-      data: {
-        status: status
+      where: { id },
+      data: { status },
+      select: {
+        id: true,
+        data: true,
+        horario: true,
+        status: true,
+        email: true,
+        servico: true
       }
     })
 

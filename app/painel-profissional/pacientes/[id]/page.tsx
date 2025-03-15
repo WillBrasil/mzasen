@@ -77,6 +77,7 @@ export default function DetalhesPacientePage() {
 
   const carregarDados = async () => {
     try {
+      setIsLoading(true)
       const [pacienteRes, consultasRes] = await Promise.all([
         fetch(`/api/pacientes/${params.id}`),
         fetch(`/api/pacientes/${params.id}/consultas`)
@@ -116,8 +117,13 @@ export default function DetalhesPacientePage() {
         throw new Error("Erro ao atualizar consulta")
       }
 
-      await carregarDados()
-      
+      // Atualiza a consulta na lista local
+      setConsultas(consultas.map(consulta => 
+        consulta.id === consultaId 
+          ? { ...consulta, status: novoStatus }
+          : consulta
+      ))
+
       const mensagem = novoStatus === "confirmada" 
         ? "Consulta confirmada com sucesso! O paciente será notificado."
         : "Consulta cancelada com sucesso! O paciente será notificado."
@@ -128,6 +134,9 @@ export default function DetalhesPacientePage() {
           locale: ptBR
         })
       })
+
+      // Recarrega os dados para garantir sincronização
+      await carregarDados()
     } catch (error) {
       console.error("Erro ao atualizar status:", error)
       toast.error("Não foi possível atualizar o status da consulta", {
