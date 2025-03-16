@@ -45,3 +45,39 @@ model Agendamento {
 
   @@map("agendamentos")
 }
+
+model PlanoAlimentar {
+  id           String     @id @default(cuid())
+  pacienteId   String
+  observacoes  String
+  refeicoes    Refeicao[]
+  atualizadoEm DateTime   @default(now())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("planos_alimentares")
+}
+
+model Refeicao {
+  id              String         @id @default(cuid())
+  titulo          String
+  horario         String
+  alimentos       Alimento[]
+  planoAlimentar  PlanoAlimentar @relation(fields: [planoAlimentarId], references: [id], onDelete: Cascade)
+  planoAlimentarId String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("refeicoes")
+}
+
+model Alimento {
+  id          String   @id @default(cuid())
+  descricao   String
+  refeicao    Refeicao @relation(fields: [refeicaoId], references: [id], onDelete: Cascade)
+  refeicaoId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("alimentos")
+}
