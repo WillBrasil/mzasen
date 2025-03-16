@@ -33,13 +33,12 @@ interface PlanoAlimentar {
   atualizadoEm?: string
 }
 
-interface PageProps {
-  params: {
-    id: string
-  }
+type Props = {
+  params: { id: string }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export default function PlanoAlimentarProfissionalPage({ params }: PageProps) {
+export default function PlanoAlimentarProfissionalPage({ params, searchParams }: Props) {
   const { user } = useAuth()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
