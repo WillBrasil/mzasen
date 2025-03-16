@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { format } from "date-fns"
+import { format, isValid } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
 export async function GET(request: Request) {
@@ -45,20 +45,36 @@ export async function GET(request: Request) {
         horario: true,
         status: true,
         servico: true,
-        email: true
+        profissional: true
       }
     })
 
     console.log("Consultas encontradas:", consultasDB)
 
     // Formata as datas das consultas
-    const consultas = consultasDB.map(consulta => ({
-      id: consulta.id,
-      data: consulta.data ? format(new Date(consulta.data), "dd/MM/yyyy", { locale: ptBR }) : "Data não definida",
-      horario: consulta.horario || "Horário não definido",
-      status: consulta.status,
-      servico: consulta.servico
-    }))
+    const consultas = consultasDB.map(consulta => {
+      let dataFormatada = "Data não definida"
+      
+      if (consulta.data) {
+        try {
+          const data = new Date(consulta.data)
+          if (isValid(data)) {
+            dataFormatada = format(data, "dd/MM/yyyy", { locale: ptBR })
+          }
+        } catch (error) {
+          console.error("Erro ao formatar data:", error)
+        }
+      }
+
+      return {
+        id: consulta.id,
+        data: dataFormatada,
+        horario: consulta.horario || "Horário não definido",
+        status: consulta.status,
+        servico: consulta.servico,
+        profissional: consulta.profissional
+      }
+    })
 
     console.log("Consultas formatadas:", consultas)
 

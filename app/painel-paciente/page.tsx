@@ -144,11 +144,10 @@ export default function PainelPacientePage() {
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-gray-500" />
                       <span>
-                        {format(new Date(consultas[0].data), "PPP", {
-                          locale: ptBR,
-                        })}
-                        {" às "}
-                        {consultas[0].horario}
+                        {consultas[0].data}
+                        {consultas[0].horario !== "Horário não definido" && (
+                          <>{" às "}{consultas[0].horario}</>
+                        )}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
