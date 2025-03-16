@@ -64,7 +64,7 @@ export default function PainelPacientePage() {
   const carregarDados = async () => {
     try {
       const [consultasRes, dadosRes] = await Promise.all([
-        fetch("/api/consultas"),
+        fetch(`/api/pacientes/${user?.id}/consultas`),
         fetch("/api/pacientes/dados"),
       ])
 
