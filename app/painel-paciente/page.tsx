@@ -251,11 +251,10 @@ export default function PainelPacientePage() {
                     >
                       <div className="space-y-1">
                         <p className="font-medium">
-                          {format(new Date(consulta.data), "PPP", {
-                            locale: ptBR,
-                          })}
-                          {" às "}
-                          {consulta.horario}
+                          {consulta.data}
+                          {consulta.horario !== "Horário não definido" && (
+                            <>{" às "}{consulta.horario}</>
+                          )}
                         </p>
                         <p className="text-sm text-gray-500">
                           Profissional: {consulta.profissional}
