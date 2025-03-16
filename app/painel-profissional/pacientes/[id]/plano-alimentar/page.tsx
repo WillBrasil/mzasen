@@ -195,7 +195,7 @@ export default function PlanoAlimentarProfissionalPage({ params }: PageProps) {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            onClick={() => router.push(`/painel-profissional/pacientes/${pacienteId}`)}
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
