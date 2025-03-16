@@ -61,6 +61,16 @@ export default function DetalhesPacientePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [consultasPendentes, setConsultasPendentes] = useState(0)
   const [planosParaAtualizar, setPlanosParaAtualizar] = useState(0)
+  const [planoAlimentar, setPlanoAlimentar] = useState<{
+    id: string;
+    refeicoes: {
+      titulo: string;
+      horario: string;
+      alimentos: string[];
+    }[];
+    observacoes: string;
+    atualizadoEm: string;
+  } | null>(null)
 
   useEffect(() => {
     carregarDados()
@@ -78,9 +88,10 @@ export default function DetalhesPacientePage() {
   const carregarDados = async () => {
     try {
       setIsLoading(true)
-      const [pacienteRes, consultasRes] = await Promise.all([
+      const [pacienteRes, consultasRes, planoRes] = await Promise.all([
         fetch(`/api/pacientes/${params.id}`),
-        fetch(`/api/pacientes/${params.id}/consultas`)
+        fetch(`/api/pacientes/${params.id}/consultas`),
+        fetch(`/api/pacientes/${params.id}/plano-alimentar`)
       ])
 
       if (!pacienteRes.ok || !consultasRes.ok) {
@@ -89,9 +100,11 @@ export default function DetalhesPacientePage() {
 
       const pacienteData = await pacienteRes.json()
       const consultasData = await consultasRes.json()
+      const planoData = await planoRes.json()
 
       setPaciente(pacienteData.paciente)
       setConsultas(consultasData.consultas)
+      setPlanoAlimentar(planoData)
     } catch (error) {
       console.error("Erro ao carregar dados:", error)
       toast.error("Erro ao carregar dados do paciente", {
@@ -246,17 +259,60 @@ export default function DetalhesPacientePage() {
                 Plano Alimentar
               </CardTitle>
               <CardDescription>
-                Último plano alimentar do paciente
+                {planoAlimentar ? (
+                  `Atualizado em ${format(new Date(planoAlimentar.atualizadoEm), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`
+                ) : (
+                  "Nenhum plano alimentar cadastrado"
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button
-                onClick={() =>
-                  router.push(`/painel-profissional/pacientes/${paciente.id}/plano-alimentar`)
-                }
-              >
-                Ver Plano Alimentar
-              </Button>
+              {planoAlimentar ? (
+                <div className="space-y-4">
+                  {planoAlimentar.refeicoes.map((refeicao, index) => (
+                    <div key={index} className="border-b pb-4 last:border-0">
+                      <h3 className="font-medium flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        {refeicao.titulo} - {refeicao.horario}
+                      </h3>
+                      <ul className="mt-2 space-y-1">
+                        {refeicao.alimentos.map((alimento, i) => (
+                          <li key={i} className="text-gray-600 ml-6">
+                            • {alimento}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                  {planoAlimentar.observacoes && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600">
+                        <strong>Observações:</strong> {planoAlimentar.observacoes}
+                      </p>
+                    </div>
+                  )}
+                  <div className="pt-4">
+                    <Button
+                      onClick={() =>
+                        router.push(`/painel-profissional/pacientes/${paciente?.id}/plano-alimentar`)
+                      }
+                    >
+                      Editar Plano Alimentar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <p className="text-gray-600 mb-4">Este paciente ainda não possui um plano alimentar cadastrado.</p>
+                  <Button
+                    onClick={() =>
+                      router.push(`/painel-profissional/pacientes/${paciente?.id}/plano-alimentar`)
+                    }
+                  >
+                    Criar Plano Alimentar
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

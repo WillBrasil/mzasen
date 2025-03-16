@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Plus, Trash2, Save } from "lucide-react"
 import { toast } from "sonner"
+import { use } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -33,13 +34,18 @@ interface PlanoAlimentar {
   atualizadoEm?: string
 }
 
-export default function PlanoAlimentarProfissionalPage({ params }: any) {
+interface PageProps {
+  params: Promise<{ id: string }>
+}
+
+export default function PlanoAlimentarProfissionalPage({ params }: PageProps) {
   const { user } = useAuth()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const pacienteId = use(params).id
   const [planoAlimentar, setPlanoAlimentar] = useState<PlanoAlimentar>({
-    pacienteId: params.id,
+    pacienteId,
     refeicoes: [],
     observacoes: "",
   })
@@ -51,13 +57,13 @@ export default function PlanoAlimentarProfissionalPage({ params }: any) {
       return
     }
     carregarDados()
-  }, [user, router, params.id])
+  }, [user, router, pacienteId])
 
   const carregarDados = async () => {
     try {
       const [planoRes, pacienteRes] = await Promise.all([
-        fetch(`/api/pacientes/${params.id}/plano-alimentar`),
-        fetch(`/api/pacientes/${params.id}`),
+        fetch(`/api/pacientes/${pacienteId}/plano-alimentar`),
+        fetch(`/api/pacientes/${pacienteId}`),
       ])
 
       const pacienteData = await pacienteRes.json()
@@ -159,7 +165,7 @@ export default function PlanoAlimentarProfissionalPage({ params }: any) {
   const salvarPlanoAlimentar = async () => {
     setIsSaving(true)
     try {
-      const response = await fetch(`/api/pacientes/${params.id}/plano-alimentar`, {
+      const response = await fetch(`/api/pacientes/${pacienteId}/plano-alimentar`, {
         method: planoAlimentar.id ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -172,7 +178,7 @@ export default function PlanoAlimentarProfissionalPage({ params }: any) {
       }
 
       toast.success("Plano alimentar salvo com sucesso!")
-      router.push(`/painel-profissional/pacientes/${params.id}`)
+      router.push(`/painel-profissional/pacientes/${pacienteId}`)
     } catch (error) {
       console.error("Erro ao salvar plano alimentar:", error)
       toast.error("Erro ao salvar plano alimentar")
@@ -189,7 +195,7 @@ export default function PlanoAlimentarProfissionalPage({ params }: any) {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            onClick={() => router.push(`/painel-profissional/pacientes/${params.id}`)}
+            onClick={() => router.push(`/painel-profissional/pacientes/${pacienteId}`)}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
