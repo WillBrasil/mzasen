@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Leaf, ArrowLeft, Calendar, LineChart, Scale, Clock, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import { useAuth } from "@/lib/auth"
 
 export default function ConsultaPage() {

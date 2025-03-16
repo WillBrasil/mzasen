@@ -2,8 +2,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { Leaf, Mail } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui"
 
 export default function EquipePage() {
   return (

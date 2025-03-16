@@ -4,10 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { Leaf, ChevronLeft, Eye, EyeOff } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
+import { Input } from "@/components/ui"
+import { Label } from "@/components/ui"
 import { useAuth } from "@/lib/auth"
 import { 
   validateCPF, 
@@ -18,7 +18,7 @@ import {
   formatCPF,
   formatPhone
 } from "@/lib/utils/validation"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui"
 
 export default function RegistroPage() {
   const { register, loading, error } = useAuth()

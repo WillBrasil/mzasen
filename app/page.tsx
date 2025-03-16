@@ -2,8 +2,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { ChevronRight, Heart, Apple, Users, Calendar, ArrowRight, Mail, Phone, MapPin } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui"
 
 // Importe os componentes SiteHeader e SiteFooter
 import { SiteHeader } from "@/components/layout/site-header"

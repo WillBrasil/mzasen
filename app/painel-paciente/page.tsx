@@ -17,14 +17,14 @@ import {
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui"
 
 interface Consulta {
   id: string

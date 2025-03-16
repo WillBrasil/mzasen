@@ -8,8 +8,8 @@ import { ptBR } from "date-fns/locale"
 import { toast } from "sonner"
 import { use } from "react"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
 import { useAuth } from "@/lib/auth"
 
 interface Refeicao {

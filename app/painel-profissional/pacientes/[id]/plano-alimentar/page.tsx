@@ -6,17 +6,17 @@ import { ArrowLeft, Plus, Trash2, Save } from "lucide-react"
 import { toast } from "sonner"
 import { use } from "react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui"
+import { Input } from "@/components/ui"
+import { Label } from "@/components/ui"
+import { Textarea } from "@/components/ui"
 import { useAuth } from "@/lib/auth"
 
 interface Refeicao {

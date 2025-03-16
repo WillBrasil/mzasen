@@ -13,8 +13,8 @@ import {
   ShieldCheck,
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui"
 import { MobileMenu } from "@/components/mobile-menu"
 
 export default function ServicosPage() {

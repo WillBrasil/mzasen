@@ -2,8 +2,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { ChevronLeft, Apple, CheckCircle2 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import { SiteHeader } from "@/components/layout/site-header"
 import { SiteFooter } from "@/components/layout/site-footer"
 

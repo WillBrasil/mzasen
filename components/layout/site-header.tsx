@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Leaf, LogIn, User } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui"
 import { MobileMenu } from "@/components/mobile-menu"
 import { cn } from "@/lib/utils"
 

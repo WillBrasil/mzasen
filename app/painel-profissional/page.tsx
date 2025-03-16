@@ -22,15 +22,15 @@ import {
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui"
+import { Input } from "@/components/ui"
 import {
   Table,
   TableBody,
@@ -38,8 +38,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+} from "@/components/ui"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui"
 
 interface Paciente {
   id: string
