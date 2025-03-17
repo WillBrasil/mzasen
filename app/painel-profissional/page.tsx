@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import {
@@ -68,26 +68,7 @@ export default function PainelProfissionalPage() {
   const [totalPaginas, setTotalPaginas] = useState(1)
   const router = useRouter()
 
-  useEffect(() => {
-    if (!user || user.tipo !== "profissional") {
-      router.push("/login")
-      return
-    }
-    carregarConsultasHoje()
-    carregarPacientes()
-  }, [user, router])
-
-  useEffect(() => {
-    if (user?.tipo !== "profissional") return
-
-    const timer = setTimeout(() => {
-      carregarPacientes()
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [busca, pagina])
-
-  const carregarConsultasHoje = async () => {
+  const carregarConsultasHoje = useCallback(async () => {
     try {
       const response = await fetch("/api/consultas/hoje")
       if (!response.ok) throw new Error("Erro ao carregar consultas")
@@ -97,9 +78,9 @@ export default function PainelProfissionalPage() {
     } catch (error) {
       console.error("Erro ao carregar consultas:", error)
     }
-  }
+  }, [])
 
-  const carregarPacientes = async () => {
+  const carregarPacientes = useCallback(async () => {
     try {
       setIsLoading(true)
       const params = new URLSearchParams({
@@ -141,7 +122,26 @@ export default function PainelProfissionalPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [busca, pagina])
+
+  useEffect(() => {
+    if (!user || user.tipo !== "profissional") {
+      router.push("/login")
+      return
+    }
+    carregarConsultasHoje()
+    carregarPacientes()
+  }, [user, router, carregarConsultasHoje, carregarPacientes])
+
+  useEffect(() => {
+    if (user?.tipo !== "profissional") return
+
+    const timer = setTimeout(() => {
+      carregarPacientes()
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [busca, pagina, user?.tipo, carregarPacientes])
 
   const handleBuscaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBusca(e.target.value)

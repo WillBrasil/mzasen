@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Plus, Trash2, Save } from "lucide-react"
 import { toast } from "sonner"
@@ -51,15 +51,7 @@ export default function PlanoAlimentarProfissionalPage({ params }: PageProps) {
   })
   const [paciente, setPaciente] = useState<{ nome: string }>({ nome: "" })
 
-  useEffect(() => {
-    if (!user || user.tipo !== "profissional") {
-      router.push("/login")
-      return
-    }
-    carregarDados()
-  }, [user, router, pacienteId])
-
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
     try {
       const [planoRes, pacienteRes] = await Promise.all([
         fetch(`/api/pacientes/${pacienteId}/plano-alimentar`),
@@ -79,7 +71,15 @@ export default function PlanoAlimentarProfissionalPage({ params }: PageProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [pacienteId])
+
+  useEffect(() => {
+    if (!user || user.tipo !== "profissional") {
+      router.push("/login")
+      return
+    }
+    carregarDados()
+  }, [user, router, pacienteId, carregarDados])
 
   const adicionarRefeicao = () => {
     setPlanoAlimentar(prev => ({

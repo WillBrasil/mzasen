@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import {
@@ -55,15 +55,7 @@ export default function PainelPacientePage() {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
-  useEffect(() => {
-    if (!user || user.tipo !== "paciente") {
-      router.push("/login")
-      return
-    }
-    carregarDados()
-  }, [user, router])
-
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
     try {
       const [consultasRes, dadosRes] = await Promise.all([
         fetch(`/api/pacientes/${user?.id}/consultas`),
@@ -84,7 +76,15 @@ export default function PainelPacientePage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user || user.tipo !== "paciente") {
+      router.push("/login")
+      return
+    }
+    carregarDados()
+  }, [user, router, carregarDados])
 
   if (!user) {
     return null

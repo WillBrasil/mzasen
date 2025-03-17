@@ -21,7 +21,9 @@ import {
 import { Alert, AlertDescription } from "@/components/ui"
 
 export default function RegistroPage() {
-  const { register, loading, error } = useAuth()
+  const { login, loading } = useAuth()
+  const [error, setError] = useState<string | null>(null)
+  const [isRegistering, setIsRegistering] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     nome: "",
@@ -105,10 +107,36 @@ export default function RegistroPage() {
     if (!validateForm()) return
     
     try {
+      setIsRegistering(true)
+      setError(null)
+      
       const { confirmarSenha, ...userData } = formData
-      await register(userData)
+      
+      // Faz a chamada para a API de registro
+      const registerResponse = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+      
+      const registerData = await registerResponse.json()
+      
+      if (!registerResponse.ok) {
+        throw new Error(registerData.error || 'Erro ao registrar')
+      }
+      
+      // Login automático após registro bem-sucedido
+      const loginResult = await login(userData.email, userData.senha)
+      if (!loginResult.success) {
+        setError("Registro realizado, mas erro ao fazer login automático")
+      }
     } catch (err) {
       console.error("Erro ao registrar:", err)
+      setError(err instanceof Error ? err.message : "Erro ao registrar")
+    } finally {
+      setIsRegistering(false)
     }
   }
 
@@ -335,9 +363,9 @@ export default function RegistroPage() {
                   <Button 
                     type="submit" 
                     className="w-full bg-sage-600 hover:bg-sage-700"
-                    disabled={loading}
+                    disabled={isRegistering}
                   >
-                    {loading ? "Criando conta..." : "Criar Conta"}
+                    {isRegistering ? "Criando conta..." : "Criar Conta"}
                   </Button>
 
                   <p className="text-center text-sm text-sage-600">

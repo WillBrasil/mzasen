@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getUser } from "@/lib/api-utils"
+import { getUser } from "@/lib/auth"
 
 // GET /api/pacientes/[id]/medidas
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const id = (await params).id
+    
     // Verificar autenticação
     const user = await getUser(request)
     if (!user) {
@@ -15,19 +17,37 @@ export async function GET(
     }
 
     // Verificar permissão (próprio paciente ou profissional)
-    if (user.tipo !== "profissional" && user.id !== params.id) {
+    if (user.tipo !== "profissional" && user.id !== id) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 403 })
     }
 
+    // Descomente quando o modelo estiver pronto
+    /*
     // Buscar todas as medidas do paciente
     const medidas = await prisma.medidaCorporal.findMany({
       where: {
-        pacienteId: params.id,
+        pacienteId: id,
       },
       orderBy: {
         data: "desc",
       },
     })
+    */
+
+    // Mock até o modelo estar pronto
+    const medidas = [
+      {
+        id: "1",
+        pacienteId: id,
+        data: new Date().toISOString(),
+        peso: 70.5,
+        altura: 170,
+        circunfCintura: 80,
+        circunfQuadril: 95,
+        imc: 24.2,
+        observacoes: "Boa evolução"
+      }
+    ]
 
     return NextResponse.json(medidas)
   } catch (error) {
@@ -41,10 +61,12 @@ export async function GET(
 
 // POST /api/pacientes/[id]/medidas
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const id = (await params).id
+    
     // Verificar autenticação
     const user = await getUser(request)
     if (!user) {
@@ -52,7 +74,7 @@ export async function POST(
     }
 
     // Verificar permissão (próprio paciente ou profissional)
-    if (user.tipo !== "profissional" && user.id !== params.id) {
+    if (user.tipo !== "profissional" && user.id !== id) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 403 })
     }
 
@@ -64,10 +86,12 @@ export async function POST(
       data.imc = parseFloat((data.peso / (alturaMetros * alturaMetros)).toFixed(2))
     }
 
+    // Descomente quando o modelo estiver pronto
+    /*
     // Criar nova medida
     const medida = await prisma.medidaCorporal.create({
       data: {
-        pacienteId: params.id,
+        pacienteId: id,
         peso: data.peso,
         altura: data.altura,
         circunfCintura: data.circunfCintura,
@@ -79,6 +103,15 @@ export async function POST(
         observacoes: data.observacoes,
       },
     })
+    */
+
+    // Mock até o modelo estar pronto
+    const medida = {
+      id: Date.now().toString(),
+      pacienteId: id,
+      data: new Date().toISOString(),
+      ...data
+    }
 
     return NextResponse.json(medida, { status: 201 })
   } catch (error) {
@@ -92,10 +125,12 @@ export async function POST(
 
 // DELETE /api/pacientes/[id]/medidas/[medidaId]
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string; medidaId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string; medidaId: string }> }
 ) {
   try {
+    const { id, medidaId } = await params;
+    
     // Verificar autenticação
     const user = await getUser(request)
     if (!user) {
@@ -103,15 +138,17 @@ export async function DELETE(
     }
 
     // Verificar permissão (próprio paciente ou profissional)
-    if (user.tipo !== "profissional" && user.id !== params.id) {
+    if (user.tipo !== "profissional" && user.id !== id) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 403 })
     }
 
+    // Comentado até que o modelo esteja pronto
+    /*
     // Verificar se a medida existe
     const medida = await prisma.medidaCorporal.findUnique({
       where: {
-        id: params.medidaId,
-        pacienteId: params.id,
+        id: medidaId,
+        pacienteId: id,
       },
     })
 
@@ -125,11 +162,13 @@ export async function DELETE(
     // Excluir medida
     await prisma.medidaCorporal.delete({
       where: {
-        id: params.medidaId,
+        id: medidaId,
       },
     })
+    */
 
-    return NextResponse.json({ success: true })
+    // Mock para desenvolvimento
+    return NextResponse.json({ success: true, message: `Medida ${medidaId} excluída com sucesso` })
   } catch (error) {
     console.error("Erro ao excluir medida:", error)
     return NextResponse.json(

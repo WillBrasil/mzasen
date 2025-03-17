@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -72,20 +72,7 @@ export default function DetalhesPacientePage() {
     atualizadoEm: string;
   } | null>(null)
 
-  useEffect(() => {
-    carregarDados()
-  }, [])
-
-  useEffect(() => {
-    // Atualiza o contador de consultas pendentes
-    const pendentes = consultas.filter(c => c.status === "pendente").length
-    setConsultasPendentes(pendentes)
-
-    // TODO: Implementar lógica para contar planos alimentares que precisam de atualização
-    setPlanosParaAtualizar(3) // Valor mockado por enquanto
-  }, [consultas])
-
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
     try {
       setIsLoading(true)
       const [pacienteRes, consultasRes, planoRes] = await Promise.all([
@@ -114,7 +101,20 @@ export default function DetalhesPacientePage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    carregarDados()
+  }, [carregarDados])
+
+  useEffect(() => {
+    // Atualiza o contador de consultas pendentes
+    const pendentes = consultas.filter(c => c.status === "pendente").length
+    setConsultasPendentes(pendentes)
+
+    // TODO: Implementar lógica para contar planos alimentares que precisam de atualização
+    setPlanosParaAtualizar(3) // Valor mockado por enquanto
+  }, [consultas])
 
   const atualizarStatusConsulta = async (consultaId: string, novoStatus: string) => {
     try {

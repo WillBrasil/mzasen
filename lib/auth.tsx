@@ -2,143 +2,132 @@
 
 import { createContext, useContext, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { verifyJWT } from "./jwt"
 
 interface User {
   id: string
   nome: string
   email: string
-  cpf: string
-  telefone: string
-  dataNascimento: string
   tipo: string
+  telefone?: string
 }
 
 interface AuthContextType {
   user: User | null
   loading: boolean
-  error: string | null
-  login: (email: string, senha: string) => Promise<void>
-  register: (userData: Omit<User, "id" | "tipo"> & { senha: string }) => Promise<void>
+  login: (email: string, senha: string) => Promise<{ success: boolean; message?: string }>
   logout: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+export function useAuth() {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error("useAuth deve ser usado dentro de AuthProvider")
+  }
+  return context
+}
+
+export async function getUser(request: Request): Promise<User | null> {
+  const authHeader = request.headers.get("Authorization")
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null
+  }
+  
+  const token = authHeader.substring(7)
+  try {
+    const payload = verifyJWT(token) as any
+    if (!payload || !payload.id) {
+      return null
+    }
+    
+    return {
+      id: payload.id,
+      nome: payload.nome,
+      email: payload.email,
+      tipo: payload.tipo,
+      telefone: payload.telefone
+    }
+  } catch (error) {
+    console.error("Erro ao verificar token:", error)
+    return null
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    // Verificar se há um token salvo
-    const token = localStorage.getItem("token")
-    const storedUser = localStorage.getItem("user")
-    
-    if (token && storedUser) {
-      const user = JSON.parse(storedUser)
-      setUser(user)
-      
-      // Verifica a rota atual
-      const path = window.location.pathname
-      
-      // Só redireciona se estiver na home, login ou registro
-      if (path === "/" || path === "/login" || path === "/registro") {
-        if (user.tipo === "profissional") {
-          router.push("/painel-profissional")
-        } else {
-          router.push("/painel-paciente")
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        if (!token) {
+          setLoading(false)
+          return
         }
+
+        const response = await fetch("/api/auth/verify", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setUser(data.user)
+        } else {
+          localStorage.removeItem("token")
+        }
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error)
+      } finally {
+        setLoading(false)
       }
     }
-    
-    setLoading(false)
+
+    checkAuth()
   }, [router])
 
   const login = async (email: string, senha: string) => {
     try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, senha }),
       })
 
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao fazer login')
-      }
-
-      setUser(data.user)
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
-      
-      // Redireciona baseado no tipo de usuário
-      if (data.user.tipo === "profissional") {
-        router.push("/painel-profissional")
+      if (response.ok) {
+        localStorage.setItem("token", data.token)
+        setUser(data.user)
+        return { success: true }
       } else {
-        router.push("/painel-paciente")
+        return { success: false, message: data.error || "Erro ao fazer login" }
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao fazer login")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const register = async (userData: Omit<User, "id" | "tipo"> & { senha: string }) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao registrar')
-      }
-
-      setUser(data.user)
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
-      router.push("/painel-paciente")
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao registrar")
-    } finally {
-      setLoading(false)
+    } catch (error) {
+      console.error("Erro ao fazer login:", error)
+      return { success: false, message: "Erro ao conectar-se ao servidor" }
     }
   }
 
   const logout = () => {
-    setUser(null)
     localStorage.removeItem("token")
-    localStorage.removeItem("user")
-    router.push("/")
+    setUser(null)
+    router.push("/login")
   }
 
-  return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  )
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider")
+  const value = {
+    user,
+    loading,
+    login,
+    logout,
   }
-  return context
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 } 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -45,21 +45,7 @@ export default function MedidasPacientePage() {
     observacoes: ""
   })
 
-  useEffect(() => {
-    if (!user) {
-      router.push("/login")
-      return
-    }
-    
-    if (user.tipo !== "paciente") {
-      router.push("/painel-profissional")
-      return
-    }
-
-    carregarMedidas()
-  }, [user, router])
-
-  const carregarMedidas = async () => {
+  const carregarMedidas = useCallback(async () => {
     // Simulação de carregamento - remova e use a API real quando estiver pronta
     setIsLoading(true)
     
@@ -135,7 +121,21 @@ export default function MedidasPacientePage() {
       setIsLoading(false)
     }
     */
-  }
+  }, [user?.id])
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/login")
+      return
+    }
+    
+    if (user.tipo !== "paciente") {
+      router.push("/painel-profissional")
+      return
+    }
+
+    carregarMedidas()
+  }, [user, router, carregarMedidas])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target

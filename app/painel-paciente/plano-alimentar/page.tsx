@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Clock, Coffee, Sun, Moon, UtensilsCrossed, FileText, Calendar } from "lucide-react"
 import { format } from "date-fns"
@@ -32,15 +32,7 @@ export default function PlanoAlimentarPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [planoAlimentar, setPlanoAlimentar] = useState<PlanoAlimentar | null>(null)
 
-  useEffect(() => {
-    if (!user || user.tipo !== "paciente") {
-      router.push("/login")
-      return
-    }
-    carregarPlanoAlimentar()
-  }, [user, router])
-
-  const carregarPlanoAlimentar = async () => {
+  const carregarPlanoAlimentar = useCallback(async () => {
     if (!user?.id) return
 
     try {
@@ -62,7 +54,15 @@ export default function PlanoAlimentarPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user?.id])
+
+  useEffect(() => {
+    if (!user || user.tipo !== "paciente") {
+      router.push("/login")
+      return
+    }
+    carregarPlanoAlimentar()
+  }, [user, router, carregarPlanoAlimentar])
 
   if (!user) return null
 

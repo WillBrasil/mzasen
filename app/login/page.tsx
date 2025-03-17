@@ -13,8 +13,9 @@ import { validateEmail } from "@/lib/utils/validation"
 import { Alert, AlertDescription } from "@/components/ui"
 
 export default function LoginPage() {
-  const { login, loading, error } = useAuth()
+  const { login, loading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     email: "",
     senha: "",
@@ -50,9 +51,14 @@ export default function LoginPage() {
     if (!validateForm()) return
     
     try {
-      await login(formData.email, formData.senha)
+      setError(null)
+      const result = await login(formData.email, formData.senha)
+      if (!result.success) {
+        setError(result.message || "Erro ao fazer login")
+      }
     } catch (err) {
       console.error("Erro ao fazer login:", err)
+      setError("Erro ao conectar-se ao servidor")
     }
   }
 
