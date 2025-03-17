@@ -24,6 +24,9 @@ model User {
   tipo           String   @default("paciente")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  
+  // Relações
+  medidas        MedidaCorporal[]
 
   @@map("users")
 }
@@ -80,4 +83,41 @@ model Alimento {
   updatedAt   DateTime @updatedAt
 
   @@map("alimentos")
+}
+
+model MedidaCorporal {
+  id           String   @id @default(cuid())
+  pacienteId   String
+  data         DateTime @default(now())
+  peso         Float?
+  altura       Float?
+  circunfCintura Float?
+  circunfQuadril Float?
+  circunfBraco  Float?
+  circunfCoxa   Float?
+  imc          Float?
+  percentualGordura Float?
+  observacoes  String?
+  
+  // Relação com o usuário
+  usuario      User     @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("medidas_corporais")
+}
+
+model RegistroAlimentar {
+  id           String   @id @default(cuid())
+  pacienteId   String
+  data         DateTime @default(now())
+  refeicao     String
+  alimentos    String[]
+  observacoes  String?
+  emConformidade Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("registros_alimentares")
 }

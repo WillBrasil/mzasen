@@ -13,6 +13,8 @@ import {
   Scale,
   TrendingUp,
   Leaf,
+  Utensils,
+  LineChart,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth"
@@ -280,6 +282,124 @@ export default function PainelPacientePage() {
               )}
             </CardContent>
           </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <Card
+              className="relative overflow-hidden group"
+            >
+              <CardHeader className="pb-0">
+                <CardTitle className="text-lg font-semibold text-sage-900">
+                  Plano Alimentar
+                </CardTitle>
+                <CardDescription className="text-sage-600">
+                  Acompanhe seu plano alimentar
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col h-40 items-center justify-center">
+                  <div className="rounded-full w-16 h-16 bg-sage-100 flex items-center justify-center mb-4">
+                    <Utensils className="h-8 w-8 text-sage-600" />
+                  </div>
+                  <p className="text-sm text-sage-700 text-center mb-4">
+                    Acesse seu plano alimentar personalizado
+                  </p>
+                  <Button
+                    onClick={() => router.push("/painel-paciente/plano-alimentar")}
+                    className="w-full"
+                  >
+                    Ver Plano Alimentar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="relative overflow-hidden group"
+            >
+              <CardHeader className="pb-0">
+                <CardTitle className="text-lg font-semibold text-sage-900">
+                  Agendamentos
+                </CardTitle>
+                <CardDescription className="text-sage-600">
+                  Consultas e atendimentos
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col h-40 items-center justify-center">
+                  <div className="rounded-full w-16 h-16 bg-sage-100 flex items-center justify-center mb-4">
+                    <Calendar className="h-8 w-8 text-sage-600" />
+                  </div>
+                  <p className="text-sm text-sage-700 text-center mb-4">
+                    Agende e acompanhe suas consultas
+                  </p>
+                  <Button
+                    onClick={() => router.push("/painel-paciente/agendamento")}
+                    className="w-full"
+                  >
+                    Ver Agenda
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="relative overflow-hidden group"
+            >
+              <CardHeader className="pb-0">
+                <CardTitle className="text-lg font-semibold text-sage-900">
+                  Medidas Corporais
+                </CardTitle>
+                <CardDescription className="text-sage-600">
+                  Acompanhamento de medidas
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col h-40 items-center justify-center">
+                  <div className="rounded-full w-16 h-16 bg-sage-100 flex items-center justify-center mb-4">
+                    <LineChart className="h-8 w-8 text-sage-600" />
+                  </div>
+                  <p className="text-sm text-sage-700 text-center mb-4">
+                    Registre e acompanhe sua evolução
+                  </p>
+                  <Button
+                    onClick={() => router.push("/painel-paciente/medidas")}
+                    className="w-full"
+                  >
+                    Ver Medidas
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="relative overflow-hidden group"
+            >
+              <CardHeader className="pb-0">
+                <CardTitle className="text-lg font-semibold text-sage-900">
+                  Configurações
+                </CardTitle>
+                <CardDescription className="text-sage-600">
+                  Preferências da sua conta
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col h-40 items-center justify-center">
+                  <div className="rounded-full w-16 h-16 bg-sage-100 flex items-center justify-center mb-4">
+                    <Settings className="h-8 w-8 text-sage-600" />
+                  </div>
+                  <p className="text-sm text-sage-700 text-center mb-4">
+                    Gerencie as configurações da sua conta
+                  </p>
+                  <Button
+                    onClick={() => router.push("/painel-paciente/configuracoes")}
+                    className="w-full"
+                  >
+                    Configurações
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
 
