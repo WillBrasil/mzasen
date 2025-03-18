@@ -128,8 +128,8 @@ export default function RegistroPage() {
       }
       
       // Login automático após registro bem-sucedido
-      const loginResult = await login(userData.email, userData.senha)
-      if (!loginResult.success) {
+      const loginSuccess = await login(userData.email, userData.senha)
+      if (!loginSuccess) {
         setError("Registro realizado, mas erro ao fazer login automático")
       }
     } catch (err) {

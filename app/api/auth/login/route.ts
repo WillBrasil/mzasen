@@ -5,10 +5,13 @@ import { signJWT } from '@/lib/jwt'
 
 export async function POST(request: Request) {
   try {
+    console.log("Recebida solicitação de login")
     const body = await request.json()
     const { email, senha } = body
+    console.log("Tentativa de login para:", email)
 
     if (!email || !senha) {
+      console.log("Erro: E-mail ou senha não fornecidos")
       return NextResponse.json(
         { error: 'E-mail e senha são obrigatórios' },
         { status: 400 }
@@ -29,19 +32,22 @@ export async function POST(request: Request) {
       }
     })
 
+    console.log("Usuário encontrado:", user ? "Sim" : "Não")
+
     if (!user) {
       return NextResponse.json(
-        { error: 'Credenciais inválidas' },
+        { error: 'E-mail ou senha incorretos' },
         { status: 401 }
       )
     }
 
     // Verifica a senha
     const passwordMatch = await bcrypt.compare(senha, user.senha)
+    console.log("Senha correta:", passwordMatch ? "Sim" : "Não")
 
     if (!passwordMatch) {
       return NextResponse.json(
-        { error: 'Credenciais inválidas' },
+        { error: 'E-mail ou senha incorretos' },
         { status: 401 }
       )
     }
@@ -49,6 +55,7 @@ export async function POST(request: Request) {
     // Gera o token JWT
     const token = signJWT({
       id: user.id,
+      nome: user.nome,
       email: user.email,
       tipo: user.tipo
     })
@@ -56,6 +63,8 @@ export async function POST(request: Request) {
     // Remove a senha do objeto de retorno
     const { senha: _, ...userWithoutPassword } = user
 
+    console.log("Login bem-sucedido para:", email, "Tipo:", user.tipo)
+    
     return NextResponse.json({
       user: userWithoutPassword,
       token

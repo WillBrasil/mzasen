@@ -1,21 +1,24 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import React, { createContext, useContext, useEffect, useState } from "react"
+import { useRouter, usePathname } from "next/navigation"
+import { setCookie, getCookie, removeCookie } from "./cookies-utils"
 import { verifyJWT } from "./jwt"
 
-interface User {
+export interface User {
   id: string
   nome: string
   email: string
-  tipo: string
+  tipo: "paciente" | "profissional"
   telefone?: string
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (email: string, senha: string) => Promise<{ success: boolean; message?: string }>
+  error: string | null
+  login: (email: string, senha: string) => Promise<boolean>
+  register: (nome: string, email: string, senha: string, tipo: "paciente" | "profissional", telefone?: string) => Promise<boolean>
   logout: () => void
 }
 
@@ -58,40 +61,91 @@ export async function getUser(request: Request): Promise<User | null> {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem("token")
-        if (!token) {
-          setLoading(false)
-          return
-        }
-
-        const response = await fetch("/api/auth/verify", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setUser(data.user)
-        } else {
-          localStorage.removeItem("token")
-        }
-      } catch (error) {
-        console.error("Erro ao verificar autenticação:", error)
-      } finally {
-        setLoading(false)
+  // Função para verificar autenticação
+  const checkAuth = async () => {
+    // Evita chamadas duplicadas
+    if (isCheckingAuth) return;
+    setIsCheckingAuth(true);
+    
+    console.log("Verificando autenticação...")
+    const token = getCookie("token")
+    
+    if (!token) {
+      console.log("Nenhum token encontrado")
+      setLoading(false)
+      setIsCheckingAuth(false)
+      
+      // Se não há token e o usuário está tentando acessar uma rota protegida
+      if (pathname?.startsWith("/painel-") && !pathname?.includes("/login")) {
+        router.push("/login")
       }
+      return
     }
 
-    checkAuth()
-  }, [router])
+    console.log("Token encontrado, verificando...")
+    try {
+      const response = await fetch("/api/auth/verify", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
-  const login = async (email: string, senha: string) => {
+      if (response.ok) {
+        const data = await response.json()
+        console.log("Token válido, usuário:", data.user)
+        setUser(data.user)
+        
+        // Redireciona se estiver na página de login ou na raiz
+        if (pathname === "/login" || pathname === "/") {
+          const redirectPath = data.user.tipo === "profissional" 
+            ? "/painel-profissional" 
+            : "/painel-paciente"
+          console.log("Redirecionando para:", redirectPath)
+          router.push(redirectPath)
+        }
+      } else {
+        console.log("Token inválido, removendo...")
+        removeCookie("token")
+        setUser(null)
+        
+        // Se o usuário está tentando acessar uma rota protegida
+        if (pathname?.startsWith("/painel-")) {
+          router.push("/login")
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao verificar token:", err)
+      setError("Erro ao verificar autenticação")
+    } finally {
+      setLoading(false)
+      setIsCheckingAuth(false)
+    }
+  }
+
+  useEffect(() => {
+    // Impede verificações quando já temos usuário confirmado
+    // e estamos navegando em páginas protegidas
+    if (user && pathname?.startsWith("/painel-")) {
+      setLoading(false);
+      return;
+    }
+    
+    // Verifica autenticação quando a rota muda
+    checkAuth();
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  const login = async (email: string, senha: string): Promise<boolean> => {
+    setLoading(true)
+    setError(null)
+    console.log("Tentando login para:", email)
+    
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -102,22 +156,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       const data = await response.json()
+      console.log("Resposta do login:", data)
 
-      if (response.ok) {
-        localStorage.setItem("token", data.token)
-        setUser(data.user)
-        return { success: true }
-      } else {
-        return { success: false, message: data.error || "Erro ao fazer login" }
+      if (!response.ok) {
+        console.log("Login falhou:", data.error || data.message)
+        setError(data.error || data.message || "Falha ao efetuar login")
+        setLoading(false)
+        return false
       }
-    } catch (error) {
-      console.error("Erro ao fazer login:", error)
-      return { success: false, message: "Erro ao conectar-se ao servidor" }
+
+      // Salva o token em um cookie (7 dias de validade)
+      setCookie("token", data.token, 7)
+      setUser(data.user)
+      
+      // Redirecionar baseado no tipo do usuário
+      const redirectPath = data.user.tipo === "profissional" 
+        ? "/painel-profissional" 
+        : "/painel-paciente"
+      
+      console.log("Login bem-sucedido, redirecionando para:", redirectPath)
+      setTimeout(() => {
+        router.push(redirectPath)
+      }, 100);
+      return true
+    } catch (err) {
+      console.error("Erro no login:", err)
+      setError("Erro de conexão com o servidor")
+      setLoading(false)
+      return false
+    }
+  }
+
+  const register = async (
+    nome: string,
+    email: string,
+    senha: string,
+    tipo: "paciente" | "profissional",
+    telefone?: string
+  ): Promise<boolean> => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nome, email, senha, tipo, telefone }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || data.message || "Falha ao registrar")
+        setLoading(false)
+        return false
+      }
+
+      // Salva o token em um cookie
+      setCookie("token", data.token, 7)
+      setUser(data.user)
+      
+      // Redirecionar baseado no tipo do usuário
+      setTimeout(() => {
+        router.push(data.user.tipo === "profissional" ? "/painel-profissional" : "/painel-paciente")
+      }, 100);
+      return true
+    } catch (err) {
+      setError("Erro de conexão com o servidor")
+      setLoading(false)
+      return false
     }
   }
 
   const logout = () => {
-    localStorage.removeItem("token")
+    removeCookie("token")
     setUser(null)
     router.push("/login")
   }
@@ -125,7 +239,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     loading,
+    error,
     login,
+    register,
     logout,
   }
 

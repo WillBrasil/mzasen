@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Leaf, ChevronLeft, Eye, EyeOff } from "lucide-react"
 
@@ -13,7 +13,7 @@ import { validateEmail } from "@/lib/utils/validation"
 import { Alert, AlertDescription } from "@/components/ui"
 
 export default function LoginPage() {
-  const { login, loading } = useAuth()
+  const { login, loading, error: authError } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -24,6 +24,13 @@ export default function LoginPage() {
     email: "",
     senha: "",
   })
+  
+  // Monitora mudanças no erro de autenticação
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   const validateForm = () => {
     const errors = {
@@ -52,13 +59,20 @@ export default function LoginPage() {
     
     try {
       setError(null)
-      const result = await login(formData.email, formData.senha)
-      if (!result.success) {
-        setError(result.message || "Erro ao fazer login")
+      console.log("Tentando fazer login com:", formData.email)
+      
+      // Usando a função login do contexto de autenticação
+      const success = await login(formData.email, formData.senha)
+      console.log("Resultado do login:", success)
+      
+      if (!success) {
+        setError(authError || "Erro ao fazer login")
       }
+      // Não fazemos redirecionamento aqui - o contexto de autenticação já faz isso
+      
     } catch (err) {
       console.error("Erro ao fazer login:", err)
-      setError("Erro ao conectar-se ao servidor")
+      setError("Erro ao conectar-se ao servidor. Verifique sua conexão e tente novamente.")
     }
   }
 
